@@ -1,64 +1,64 @@
-(require 'package)
 (setq package-check-signature nil)
-(setq package-archives '(("gnu"    . "http://mirrors.tuna.tsinghua.edu.cn/elpa/gnu/")
-                         ("nongnu" . "http://mirrors.tuna.tsinghua.edu.cn/elpa/nongnu/")
-                         ("melpa"  . "http://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/")))
-(package-initialize)
+(use-package package
+  :config
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+  (unless (bound-and-true-p package--initialized)
+    (package-initialize)))
 
 ;;设置补全
-(global-company-mode 1)
-(global-set-key (kbd "<f2>") 'find-function)
-(setq company-minimum-prefix-length 1)
-(setq company-idle-delay 0)
-(package-install 'vertico)
-(vertico-mode t)
-(package-install 'orderless)
-(setq completion-styles '(orderless))
-(package-install 'marginalia)
-(marginalia-mode t)
-
-;;快捷键显示
-(use-package which-key :ensure t :defer t
-  :hook (after-init . which-key-mode))
-
-;;加强搜索
-(package-install 'consult)
-(global-set-key (kbd "C-s") 'consult-line)
-(global-set-key (kbd "<f1>") 'consult-imenu)
-
-;;主题
-(use-package all-the-icons
-  :ensure t
-  :defer t
-  :init
-  (set-frame-font "all-the-icons" t))
-(package-install 'doom-themes)
-(load-theme 'doom-monokai-octagon t)
-(use-package nerd-icons)
-(use-package simple
-  :ensure nil
-  :hook (after-init . size-indication-mode)
+(use-package corfu
   :init
   (progn
-    (setq column-number-mode t)
+    (setq corfu-auto t)
+    (setq corfu-cycle t)
+    (setq corfu-quit-at-boundary t)
+    (setq corfu-quit-no-match t)
+    (setq corfu-preview-current nil)
+    (setq corfu-min-width 40)
+    (setq corfu-max-width 50)
+    (setq corfu-auto-delay 0.2)
+    (setq corfu-auto-prefix 1)
+    (setq corfu-on-exact-match nil)
+    (global-corfu-mode)
     ))
-(use-package doom-modeline
-  :ensure t
-  :init
-  (doom-modeline-mode t))
-(add-hook 'dired-mode-hook 'all-the-icons-dired-mode)
 
-;;快速代码运行
-(use-package quickrun
-  :ensure t
-  :commands (quickrun)
+;;增强minibuffer
+(use-package vertico
   :init
-  (quickrun-add-command "c/gcc"
-  '((:exec . ("%c  %o -o %e %s"
-	      "%e %a")))
-  :override t)
-  )
-(global-set-key (kbd "<f5>") 'quickrun)
+  (vertico-mode))
+(use-package orderless
+  :ensure t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+(use-package marginalia
+  :init
+  (marginalia-mode))
+(use-package consult
+  :bind (("C-s" . consult-line)
+         ("M-s" . consult-imenu)))
+
+;;语法高亮
+(use-package treesit-auto
+  :demand t
+  :config
+  (progn
+    (setq treesit-auto-install 'prompt)
+    (setq treesit-font-lock-level 4))
+  (global-treesit-auto-mode))
+
+;;eglot配置
+(use-package eglot
+  :config (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
+  :hook ((c++-ts-mode . eglot-ensure)
+         (c-ts-mode . eglot-ensure)))
+
+;;org配置
+(use-package org-superstar
+  :after org
+  :hook (org-mode . org-superstar-mode))
+
+
 
 
 

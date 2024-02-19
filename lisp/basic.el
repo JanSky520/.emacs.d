@@ -1,62 +1,27 @@
-(global-display-line-numbers-mode 1)
-;;取消开始界面
-(setq inhibit-startup-screen t)
-;;关闭工具栏
-(tool-bar-mode -1)
-;;关闭菜单栏
-(menu-bar-mode -1)
-;;关闭文件滑动控件
-(scroll-bar-mode -1)
-;;更改光标的样式
-(setq-default cursor-type 'bar)
-;;括号匹配
-(electric-pair-mode t)
-;;关闭自动备份
-(setq make-backup-files nil)
-;;让鼠标滚动更好用
-(setq mouse-wheel-scroll-amount '(3 ((shift) . 5) ((control) . nil)))
-(setq mouse-wheel-progressive-speed nil)
+(setq inhibit-startup-screen t)    ;;关闭开始界面
+(set-face-attribute 'default nil :font "JetBrainsMono NF 10")
+(dolist (charset '(kana han symbol cjk-misc bopomofo))
+  (set-fontset-font (frame-parameter nil 'font) charset (font-spec :family "霞鹜文楷等宽" :size 14)))
+(global-display-line-numbers-mode 1)    ;;显示行号
+(tool-bar-mode -1)    ;;关闭工具栏
+(menu-bar-mode -1)    ;;关闭菜单栏
+(setq make-backup-files nil)    ;;关闭自动备份
+(setq-default cursor-type 'bar)    ;;更改光标样式
+(scroll-bar-mode -1)    ;;关闭文件滑动控件
+(show-paren-mode t)    ;;括号匹配
+(electric-pair-mode t)    ;;括号补全
+(add-hook 'prog-mode-hook 'prettify-symbols-mode)    ;;会将lambda等符号美化为λ
+(delete-selection-mode 1)    ;;全选加强
+(setq ring-bell-function 'ignore)    ;;关掉哔哔声
+(fset 'yes-or-no-p 'y-or-n-p)    ;;快速yes或no
+(setq-default indent-tabs-mode nil)    ;;启用tab键
+(setq-default tab-width 4)    ;;设置tab宽度
+(global-hl-line-mode t)    ;;高亮当前行
+(setq initial-frame-alist
+      '((width . 110)
+      (height . 35)))
 
-;;括号匹配
-(show-paren-mode t)
-;;会将lambda等符号美化为λ
-(add-hook 'prog-mode-hook 'prettify-symbols-mode)
-
-;; 设置tab缩进
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-;;最近打开文件
-(require 'recentf)
-(recentf-mode 1)
-(setq recentf-max-menu-item 10)
-(global-set-key (kbd "C-x C-b") 'consult-buffer)
-;;全选加强
-(delete-selection-mode 1)
-;;开启C语言
-(require 'eglot)
-(add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
-(add-hook 'c-mode-hook #'eglot-ensure)
-(add-hook 'c++-mode-hook #'eglot-ensure)
-(global-set-key (kbd "C-/") 'eglot-format)
-
-(if (daemonp)
-    (add-hook 'after-make-frame-functions
-              (lambda (frame)
-                 (setq doom-modeline-icon t)
-                (with-selected-frame frame
-                  (efs/set-font-faces))))
-    (efs/set-font-faces))
-
-;;关掉哔哔声
-(setq ring-bell-function 'ignore)
-(fset 'yes-or-no-p 'y-or-n-p)
-;;自动加载外部文件
-(global-auto-revert-mode 1)
-(setq auto-save-default nil)
-
-
-
-
+(setq file-name-coding-system 'chinese-gb18030)
 
 
 

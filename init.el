@@ -7,5 +7,3 @@
 
 (require 'basic)
 (require 'plugin)
-
-(setq file-name-coding-system 'chinese-gb18030)

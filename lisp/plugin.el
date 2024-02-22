@@ -58,7 +58,23 @@
   :after org
   :hook (org-mode . org-superstar-mode))
 
+;;启动面板
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook)
+  :init
+  (setq dashboard-banner-logo-title "你若安好，便是晴天")
+  (setq dashboard-startup-banner 'official))
 
+;;翻译插件
+(use-package sdcv
+  :ensure t
+  :bind (("M-a" . sdcv-search-pointer+)
+         ("M-r" . sdcv-search-input+))
+  :config
+  (setq sdcv-dictionary-simple-list
+        '("简明英汉字典增强版")))
 
 
 

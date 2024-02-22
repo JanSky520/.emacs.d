@@ -1,7 +1,7 @@
 (setq inhibit-startup-screen t)    ;;关闭开始界面
 (set-face-attribute 'default nil :font "JetBrainsMono NF 10")
 (dolist (charset '(kana han symbol cjk-misc bopomofo))
-  (set-fontset-font (frame-parameter nil 'font) charset (font-spec :family "霞鹜文楷等宽" :size 14)))
+  (set-fontset-font (frame-parameter nil 'font) charset (font-spec :family "霞鹜文楷等宽 屏幕阅读版" :size 14)))
 (global-display-line-numbers-mode 1)    ;;显示行号
 (tool-bar-mode -1)    ;;关闭工具栏
 (menu-bar-mode -1)    ;;关闭菜单栏
@@ -21,7 +21,7 @@
       '((width . 110)
       (height . 35)))
 
-(setq file-name-coding-system 'chinese-gb18030)
+
 
 
 

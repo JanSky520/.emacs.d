@@ -19,7 +19,8 @@
 (global-hl-line-mode t)    ;;高亮当前行
 (setq initial-frame-alist
       '((width . 110)
-      (height . 35)))
+      (height . 35)
+      (alpha-background . 90)))
 
 
 

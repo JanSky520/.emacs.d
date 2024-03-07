@@ -112,10 +112,39 @@
   :ensure t
   :init (doom-modeline-mode t))
 
+;;终端
+(use-package vterm
+  :ensure t
+  :config )
+(use-package vterm-toggle
+  :ensure t
+  :bind ("<f2>" . vterm-toggle)
+  :config )
+(setq vterm-toggle-fullscreen-p nil)
+(add-to-list 'display-buffer-alist
+             '((lambda (buffer-or-name _)
+                   (let ((buffer (get-buffer buffer-or-name)))
+                     (with-current-buffer buffer
+                       (or (equal major-mode 'vterm-mode)
+                           (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+                (display-buffer-reuse-window display-buffer-at-bottom)
+                (reusable-frames . visible)
+                (window-height . 0.23)))
+
 ;;文件管理
+(use-package neotree
+  :ensure t
+  :bind
+  ("C-," . neotree-toggle)
+  ("M-," . neotree-refresh))
+(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
 (use-package pdf-tools
   :ensure t
   :init (pdf-tools-install))
+
+(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
+(add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode -1)))
+(add-hook 'neotree-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 
 (provide 'plugin)

@@ -7,4 +7,4 @@
 
 (require 'basic)
 ;(require 'plugin)
-;(require 'myfun)
+(require 'myfun)

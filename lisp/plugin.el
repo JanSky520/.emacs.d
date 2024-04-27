@@ -41,6 +41,8 @@
   (dashboard-setup-startup-hook)
   :init
   (setq dashboard-banner-logo-title "你若安好，便是晴天")
+  (setq dashboard-init-info "中国科学院大学沈阳计算技术研究所")
+  (setq dashboard-footer-messages '("落霞与孤鹜齐飞 秋水共长天一色"))
   (setq dashboard-startup-banner 'official)
   (setq dashboard-display-icons-p t)
   (setq dashboard-icon-type 'nerd-icons)
@@ -71,26 +73,16 @@
   :config (setq recentf-max-menu-items 10))
 
 ;;设置补全
-(use-package corfu
+(use-package company
   :ensure t
   :init
-  (progn
-    (setq corfu-auto t)
-    (setq corfu-cycle t)
-    (setq corfu-quit-at-boundary t)
-    (setq corfu-quit-no-match 'separator)
-    (setq corfu-preview-current nil)
-    (setq corfu-min-width 40)
-    (setq corfu-max-width 50)
-    (setq corfu-auto-delay 0)
-    (setq corfu-auto-prefix 1)
-    (setq corfu-on-exact-match nil)
-    (global-corfu-mode)
-    ))
-(add-hook 'eshell-mode-hook
-          (lambda ()
-            (setq-local corfu-auto nil)
-            (corfu-mode)))
+  (global-company-mode t)
+  :config
+  (setq company-minimum-prefix-length 1)
+  (setq company-idle-delay 0))
+(use-package company-box
+  :ensure t
+  :hook (company-mode . company-box-mode))
 
 ;;翻译插件
 (use-package sdcv
@@ -131,20 +123,7 @@
                 (reusable-frames . visible)
                 (window-height . 0.23)))
 
-;;文件管理
-(use-package neotree
-  :ensure t
-  :bind
-  ("C-," . neotree-toggle)
-  ("M-," . neotree-refresh))
-(setq neo-theme (if (display-graphic-p) 'icons 'arrow))
-(use-package pdf-tools
-  :ensure t
-  :init (pdf-tools-install))
-
-(add-hook 'pdf-view-mode-hook (lambda () (display-line-numbers-mode -1)))
 (add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode -1)))
-(add-hook 'neotree-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 
 (provide 'plugin)

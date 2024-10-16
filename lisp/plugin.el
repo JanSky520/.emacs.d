@@ -16,9 +16,11 @@
 
 ;;eglot配置
 (use-package eglot
-  :config (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
-  :hook ((c++-ts-mode . eglot-ensure)
-         (c-ts-mode . eglot-ensure)))
+    :config (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
+             (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
+    :hook ((c++-mode . eglot-ensure)
+           (c-mode . eglot-ensure)
+           (python-mode . eglot-ensure)))
 (use-package flymake
   :hook (prog-mode . flymake-mode)
   :hook (flymake-mode . (lambda ()
@@ -73,15 +75,26 @@
   :config (setq recentf-max-menu-items 10))
 
 ;;设置补全
-(use-package company
-  :ensure t
-  :init  (global-company-mode t)
-  :config
-  (setq company-minimum-prefix-length 1)
-  (setq company-idle-delay 0))
-(use-package company-box
-  :ensure t
-  :hook (company-mode . company-box-mode))
+(use-package corfu
+    :ensure t
+    :init
+    (progn
+      (setq corfu-auto t)
+      (setq corfu-cycle t)
+      (setq corfu-quit-at-boundary t)
+      (setq corfu-quit-no-match t)
+      (setq corfu-preview-current t)
+      (setq corfu-min-width 40)
+      (setq corfu-max-width 50)
+      (setq corfu-auto-delay 0.2)
+      (setq corfu-auto-prefix 1)
+      (setq corfu-on-exact-match nil)
+      (setq corfu-preselect 'promt)
+      (global-corfu-mode)
+      (corfu-popupinfo-mode)))
+  (use-package corfu-terminal
+    :ensure t
+    :config (corfu-terminal-mode t))
 
 ;;翻译插件
 (use-package sdcv

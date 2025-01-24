@@ -16,11 +16,11 @@
 
 ;;eglot配置
 (use-package eglot
-    :config (add-to-list 'eglot-server-programs '((c++-mode c-mode) "clangd"))
-             (add-to-list 'eglot-server-programs '(python-mode . ("pyright-langserver" "--stdio")))
-    :hook ((c++-mode . eglot-ensure)
-           (c-mode . eglot-ensure)
-           (python-mode . eglot-ensure)))
+    :config (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
+             (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
+    :hook ((c++-ts-mode . eglot-ensure)
+           (c-ts-mode . eglot-ensure)
+           (python-ts-mode . eglot-ensure)))
 (use-package flymake
   :hook (prog-mode . flymake-mode)
   :hook (flymake-mode . (lambda ()
@@ -30,11 +30,11 @@
                                             eldoc-documentation-functions)))))
   :init (setq elisp-flymake-byte-compile-load-path (cons "./" load-path)))
 
-;;org配置
-(use-package org-superstar
+;;org美化
+(use-package org-modern
   :ensure t
-  :after org
-  :hook (org-mode . org-superstar-mode))
+  :config
+  (global-org-modern-mode))
 
 ;;启动面板
 (use-package dashboard
@@ -51,7 +51,7 @@
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
   (setq dashboard-set-navigator t)
-  (setq dashboard-items '((recents . 5))))
+  (setq dashboard-items '((recents . 7))))
 
 ;;增强minibuffer
 (use-package vertico

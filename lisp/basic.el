@@ -1,8 +1,8 @@
 (setq inhibit-startup-screen t)    ;;关闭开始界面
-(set-face-attribute 'default nil :font "JetBrainsMono NF 10")
-(dolist (charset '(kana han symbol cjk-misc bopomofo))
-  (set-fontset-font (frame-parameter nil 'font) charset (font-spec :family "霞鹜文楷等宽 屏幕阅读版" :size 14)))
+(set-face-attribute 'default nil :font "Sarasa Term SC Nerd 14")
 (global-display-line-numbers-mode 1)    ;;显示行号
+(setq display-line-numbers-width-start t)  ; 动态调整行号宽度
+(setq display-line-numbers-grow-only t)    ; 行号宽度只增不减（减少抖动）
 (tool-bar-mode -1)    ;;关闭工具栏
 (menu-bar-mode -1)    ;;关闭菜单栏
 (setq make-backup-files nil)    ;;关闭自动备份
@@ -18,13 +18,12 @@
 (setq-default tab-width 4)    ;;设置tab宽度
 (global-hl-line-mode t)    ;;高亮当前行
 (setq initial-frame-alist
-      '((width . 110)
-      (height . 35)
-      (alpha-background . 90)))
+      '((width . 135)
+      (height . 40)))
 
-
-
-
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)))
 
 
 (provide 'basic)

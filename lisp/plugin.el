@@ -2,39 +2,60 @@
   :config
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
   (unless (bound-and-true-p package--initialized)
-  (package-initialize)))
+    (package-initialize)))
 
-;;语法高亮
-(use-package treesit-auto
-  :ensure t
-  :demand t
-  :config
-  (progn
-    (setq treesit-auto-install 'prompt)
-    (setq treesit-font-lock-level 4))
-  (global-treesit-auto-mode))
+;;代码高亮
+(use-package treesit
+  :config (setq treesit-font-lock-level 4)
+  :init
+  (setq treesit-language-source-alist
+    '((elisp      . ("https://github.com/Wilfred/tree-sitter-elisp"))
+      (c          . ("https://github.com/tree-sitter/tree-sitter-c"))
+      (cpp        . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+      (org        . ("https://github.com/milisims/tree-sitter-org"))
+      (python     . ("https://github.com/tree-sitter/tree-sitter-python"))
+      (sql        . ("https://github.com/m-novikov/tree-sitter-sql"))
+      (toml       . ("https://github.com/tree-sitter/tree-sitter-toml"))))
+  (add-to-list 'major-mode-remap-alist '(python-mode . python-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c-mode . c-ts-mode))
+  (add-to-list 'major-mode-remap-alist '(c++-mode . c++-ts-mode)))
 
 ;;eglot配置
 (use-package eglot
-    :config (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
-             (add-to-list 'eglot-server-programs '(python-ts-mode . ("pyright-langserver" "--stdio")))
-    :hook ((c++-ts-mode . eglot-ensure)
-           (c-ts-mode . eglot-ensure)
-           (python-ts-mode . eglot-ensure)))
-(use-package flymake
-  :hook (prog-mode . flymake-mode)
-  :hook (flymake-mode . (lambda ()
-                          (setq eldoc-documentation-functions
-                                (cons 'flymake-eldoc-function
-                                      (delq 'flymake-eldoc-function
-                                            eldoc-documentation-functions)))))
-  :init (setq elisp-flymake-byte-compile-load-path (cons "./" load-path)))
-
-;;org美化
-(use-package org-modern
-  :ensure t
   :config
-  (global-org-modern-mode))
+  (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
+  :hook
+  (c++-ts-mode . eglot-ensure)
+  (c-ts-mode . eglot-ensure))
+(use-package nasm-mode
+  :ensure t
+  :mode ("\\.asm\\'" "\\.S\\'")
+  :config (define-key nasm-mode-map (kbd "C-c C-c") 'nasm-compile))
+
+;;设置补全
+(use-package corfu
+  :ensure t
+  :hook (after-init . global-corfu-mode)
+  :init
+  (progn
+    (setq corfu-auto t)
+    (setq corfu-cycle t)
+    (setq corfu-quit-at-boundary t)
+    (setq corfu-quit-no-match t)
+    (setq corfu-preview-current t)
+    (setq corfu-min-width 40)
+    (setq corfu-max-width 50)
+    (setq corfu-auto-delay 0.2)
+    (setq corfu-auto-prefix 1)
+    (setq corfu-on-exact-match nil)
+    (setq corfu-preselect 'promt)
+    (corfu-popupinfo-mode)))
+(use-package corfu-terminal
+  :ensure t
+  :config (corfu-terminal-mode t))
+(use-package which-key
+  :config
+  (which-key-mode 1))
 
 ;;启动面板
 (use-package dashboard
@@ -53,87 +74,55 @@
   (setq dashboard-set-navigator t)
   (setq dashboard-items '((recents . 7))))
 
-;;增强minibuffer
-(use-package vertico
-  :ensure t
-  :init (vertico-mode))
-(use-package orderless
-  :ensure t
-  :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
-(use-package marginalia
-  :ensure t
-  :init (marginalia-mode))
-(use-package consult
-  :ensure t
-  :bind (("C-s" . consult-line)
-         ("M-s" . consult-imenu)
-         ("C-x b" . consult-buffer)))
-(use-package recentf
-  :init (recentf-mode t)
-  :config (setq recentf-max-menu-items 10))
-
-;;设置补全
-(use-package corfu
-    :ensure t
-    :init
-    (progn
-      (setq corfu-auto t)
-      (setq corfu-cycle t)
-      (setq corfu-quit-at-boundary t)
-      (setq corfu-quit-no-match t)
-      (setq corfu-preview-current t)
-      (setq corfu-min-width 40)
-      (setq corfu-max-width 50)
-      (setq corfu-auto-delay 0.2)
-      (setq corfu-auto-prefix 1)
-      (setq corfu-on-exact-match nil)
-      (setq corfu-preselect 'promt)
-      (global-corfu-mode)
-      (corfu-popupinfo-mode)))
-  (use-package corfu-terminal
-    :ensure t
-    :config (corfu-terminal-mode t))
-
-;;翻译插件
-(use-package sdcv
-  :ensure t
-  :bind (("M-a" . sdcv-search-pointer+)
-         ("M-r" . sdcv-search-input+))
-  :config
-  (setq sdcv-dictionary-simple-list
-        '("简明英汉字典增强版")))
-
 ;;主题
 (use-package nerd-icons
-  :ensure t
-  )
+  :ensure t)
 (use-package doom-themes
   :ensure t
-  :init (load-theme 'doom-monokai-classic t))
+  :init (load-theme 'doom-dracula t))
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode t))
+(use-package rainbow-delimiters
+  :ensure t
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+;;文件设置
+(use-package neotree
+  :ensure t
+  :config
+  (setq neo-theme (if (display-graphic-p) 'nerd-icons))
+  (setq neo-smart-open t)
+  (setq neo-autorefresh t)
+  (setq neo-show-hidden-files t)
+  (setq neo-window-width 20)
+  (global-set-key [f8] 'neotree-toggle))
+
+;;org美化
+(use-package org-modern
+  :ensure t
+  :hook (org-mode . org-modern-mode))
 
 ;;终端
+(use-package project
+  :config
+  (setq project-vc-extra-root-markers '("package.json" "Makefile" "README.md")))
 (use-package vterm
-  :ensure t
-  :config )
+  :ensure t)
 (use-package vterm-toggle
   :ensure t
-  :bind ("<f2>" . vterm-toggle)
-  :config )
+  :bind ("<f2>" . vterm-toggle))
 (setq vterm-toggle-fullscreen-p nil)
 (add-to-list 'display-buffer-alist
              '((lambda (buffer-or-name _)
-                   (let ((buffer (get-buffer buffer-or-name)))
-                     (with-current-buffer buffer
-                       (or (equal major-mode 'vterm-mode)
-                           (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
-                (display-buffer-reuse-window display-buffer-at-bottom)
-                (reusable-frames . visible)
-                (window-height . 0.23)))
+                 (let ((buffer (get-buffer buffer-or-name)))
+                   (with-current-buffer buffer
+                     (or (equal major-mode 'vterm-mode)
+                         (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
+               (display-buffer-reuse-window display-buffer-at-bottom)
+               (reusable-frames . visible)
+               (window-height . 0.20)))
+
 
 (add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode -1)))
 

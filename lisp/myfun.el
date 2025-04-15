@@ -1,6 +1,7 @@
 (defun my-update-time ()
   "设置modeline时间显示"
   (setq display-time-format "%Y年%m月%d日 %H:%M:%S %A")
+  (setq display-time-default-load-average nil)
   (display-time-mode 1))
 (run-with-timer 0 1 'my-update-time)
 
@@ -26,6 +27,22 @@
                                       (setq i (+ 32 i)) i (single-key-description i)
                                       (setq i (+ 32 i)) i (single-key-description i)))
                       (setq i (- i 96))))))
+
+(defun auto-hexl ()
+  "自动查看二进制文件"
+  (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
+  (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode)))
+(auto-hexl)
+
+(defun nasm-compile ()
+  "自动使用 make 编译汇编"
+  (interactive)
+  (unless (file-exists-p "Makefile")
+    (error "No Makefile found in current directory"))
+  (compile "make bochs"))
+
+
+
 
 
 (provide 'myfun)

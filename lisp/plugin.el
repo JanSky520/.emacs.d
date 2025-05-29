@@ -29,8 +29,10 @@
   (c-ts-mode . eglot-ensure))
 (use-package nasm-mode
   :ensure t
-  :mode ("\\.asm\\'" "\\.S\\'")
+  :mode ("\\.asm\\'" "\\.inc\\'")
   :config (define-key nasm-mode-map (kbd "C-c C-c") 'nasm-compile))
+(use-package fish-mode
+  :ensure t)
 
 ;;设置补全
 (use-package corfu
@@ -50,9 +52,12 @@
     (setq corfu-on-exact-match nil)
     (setq corfu-preselect 'promt)
     (corfu-popupinfo-mode)))
-(use-package corfu-terminal
+(use-package cape
   :ensure t
-  :config (corfu-terminal-mode t))
+  :init
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block))
 (use-package which-key
   :config
   (which-key-mode 1))
@@ -77,54 +82,16 @@
 ;;主题
 (use-package nerd-icons
   :ensure t)
-(use-package doom-themes
-  :ensure t
-  :init (load-theme 'doom-dracula t))
-(use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode t))
 (use-package rainbow-delimiters
   :ensure t
   :hook (prog-mode . rainbow-delimiters-mode))
 
-;;文件设置
-(use-package neotree
-  :ensure t
-  :config
-  (setq neo-theme (if (display-graphic-p) 'nerd-icons))
-  (setq neo-smart-open t)
-  (setq neo-autorefresh t)
-  (setq neo-show-hidden-files t)
-  (setq neo-window-width 20)
-  (global-set-key [f8] 'neotree-toggle))
 
 ;;org美化
 (use-package org-modern
   :ensure t
   :hook (org-mode . org-modern-mode))
 
-;;终端
-(use-package project
-  :config
-  (setq project-vc-extra-root-markers '("package.json" "Makefile" "README.md")))
-(use-package vterm
-  :ensure t)
-(use-package vterm-toggle
-  :ensure t
-  :bind ("<f2>" . vterm-toggle))
-(setq vterm-toggle-fullscreen-p nil)
-(add-to-list 'display-buffer-alist
-             '((lambda (buffer-or-name _)
-                 (let ((buffer (get-buffer buffer-or-name)))
-                   (with-current-buffer buffer
-                     (or (equal major-mode 'vterm-mode)
-                         (string-prefix-p vterm-buffer-name (buffer-name buffer))))))
-               (display-buffer-reuse-window display-buffer-at-bottom)
-               (reusable-frames . visible)
-               (window-height . 0.20)))
-
-
-(add-hook 'vterm-mode-hook (lambda () (display-line-numbers-mode -1)))
 
 
 (provide 'plugin)

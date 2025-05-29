@@ -41,6 +41,25 @@
     (error "No Makefile found in current directory"))
   (compile "make bochs"))
 
+(defun toggle-eshell ()
+  "Toggle eshell window at the bottom. If closing, KILL the eshell buffer."
+  (interactive)
+  (if (get-buffer-window "*eshell*")
+      ;; 如果 eshell 窗口已打开，则完全退出
+      (let ((buf (get-buffer "*eshell*")))
+        (when (get-buffer-process buf)  ; 如果 eshell 有进程，则杀死
+          (eshell-kill-process))
+        (kill-buffer buf)              ; 杀死缓冲区
+        (delete-window (get-buffer-window buf)))  ; 关闭窗口
+    ;; 否则，新建 eshell
+    (let ((win (split-window-below 30)))  ; 固定 10 行高度
+      (select-window win)
+      (eshell))))
+(global-set-key (kbd "<f2>") 'toggle-eshell)
+
+
+
+
 
 
 

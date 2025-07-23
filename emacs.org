@@ -1,0 +1,225 @@
+#+title:   elisp 配置文件
+#+author:  JanSky
+#+date:    2025-07-10
+#+STARTUP: overview indent
+
+
+* 插件设置
+** 插件源配置
+#+begin_src emacs-lisp
+  (use-package package
+    :config
+    (setq package-check-signature nil)
+    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+    (unless (bound-and-true-p package--initialized)
+      (package-initialize)))
+#+end_src
+** 代码配置
+#+begin_src emacs-lisp
+  (use-package treesit-auto
+    :ensure t
+    :demand t
+    :config
+    (setq treesit-auto-install 'prompt)
+    (setq treesit-font-lock-level 4)
+    (global-treesit-auto-mode))
+  (use-package nasm-mode
+    :ensure t
+    :mode ("\\.asm\\'" "\\.inc\\'")
+    :config (define-key nasm-mode-map (kbd "C-c C-c") 'nasm-compile))
+  (use-package corfu
+    :ensure t
+    :hook (after-init . global-corfu-mode)
+    :init
+    (progn
+      (setq corfu-auto t)
+      (setq corfu-cycle t)
+      (setq corfu-quit-at-boundary t)
+      (setq corfu-quit-no-match t)
+      (setq corfu-preview-current t)
+      (setq corfu-min-width 40)
+      (setq corfu-max-width 50)
+      (setq corfu-auto-delay 0.2)
+      (setq corfu-auto-prefix 1)
+      (setq corfu-on-exact-match nil)
+      (setq corfu-preselect 'promt)
+      (corfu-popupinfo-mode)))
+  (use-package cape
+    :ensure t
+    :init
+    (add-hook 'completion-at-point-functions #'cape-dabbrev)
+    (add-hook 'completion-at-point-functions #'cape-file)
+    (add-hook 'completion-at-point-functions #'cape-elisp-block))
+#+end_src
+** 快捷键提示
+#+begin_src emacs-lisp
+  (use-package which-key
+    :config
+    (which-key-mode 1))
+#+end_src
+** 启动面板
+#+begin_src emacs-lisp
+  (use-package dashboard
+    :ensure t
+    :config
+    (dashboard-setup-startup-hook)
+    :init
+    (setq dashboard-banner-logo-title "你若安好，便是晴天")
+    (setq dashboard-init-info "中国科学院大学沈阳计算技术研究所")
+    (setq dashboard-footer-messages '("落霞与孤鹜齐飞 秋水共长天一色"))
+    (setq dashboard-startup-banner 'official)
+    (setq dashboard-display-icons-p t)
+    (setq dashboard-icon-type 'nerd-icons)
+    (setq dashboard-set-heading-icons t)
+    (setq dashboard-set-file-icons t)
+    (setq dashboard-set-navigator t))
+#+end_src
+** 主题配置
+#+begin_src emacs-lisp
+  (use-package nerd-icons
+    :ensure t)
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook (prog-mode . rainbow-delimiters-mode))
+  (use-package doom-modeline
+    :ensure t
+    :init (doom-modeline-mode t))
+#+end_src
+** org 配置
+#+begin_src emacs-lisp
+  (use-package org-modern
+    :ensure t
+    :hook (org-mode . org-modern-mode))
+  (use-package org-appear
+    :ensure t
+    :hook (org-mode . org-appear-mode)
+    :config
+    (setq org-appear-autostart t)
+    (setq org-appear-autoemphasis t)
+    (setq org-appear-autolinks t)
+    (setq org-appear-autoentities t)
+    (setq org-appear-autokeywords t)
+    (setq org-appear-autosubmarkers t))
+  (use-package org-fragtog
+    :ensure t
+    :hook (org-mode . org-fragtog-mode))
+#+end_src
+** 最近文件配置
+#+begin_src emacs-lisp
+  (use-package recentf
+    :init (recentf-mode 1)
+    :config
+    (global-set-key (kbd "C-x C-b") 'recentf-open-files)
+    (setq recentf-max-menu-item 10))
+#+end_src
+
+* 自定义函数
+** 主题配置
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)                      ; 关闭开始界面
+  (global-display-line-numbers-mode 1)                 ; 显示行号
+  (setq display-line-numbers-width-start t)            ; 动态调整行号宽度
+  (setq display-line-numbers-grow-only t)              ; 行号宽度只增不减（减少抖动）
+  (tool-bar-mode -1)                                   ; 关闭工具栏
+  (menu-bar-mode -1)                                   ; 关闭菜单栏
+  (setq-default cursor-type 'bar)                      ; 更改光标样式
+  (load-theme 'modus-operandi-tinted t)                ; 设置主题
+  (global-hl-line-mode t)                              ; 高亮当前行
+  (scroll-bar-mode -1)                                 ; 关闭文件滑动控件
+  (show-paren-mode t)                                  ; 括号匹配
+  (electric-pair-mode 1)                               ; 括号补全
+  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ; 会将 lambda 等符号美化为 λ
+  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
+#+end_src
+** 功能配置
+#+begin_src emacs-lisp
+    (setq make-backup-files nil)                         ; 关闭自动备份
+    (delete-selection-mode 1)                            ; 全选加强
+    (setq ring-bell-function 'ignore)                    ; 关掉哔哔声
+    (fset 'yes-or-no-p 'y-or-n-p)                        ; 快速 yes 或 no
+    (setq-default indent-tabs-mode nil)                  ; 启用 tab 键
+    (setq-default tab-width 4)                           ; 设置 tab 宽度
+    (defun open-init-file()
+      (interactive)
+      (find-file "~/.emacs.d/emacs.org"))
+    (defun open-file-config()
+      (let (((buffer (buffer-name)))
+            if ())))
+    (global-set-key (kbd "<f3>") 'open-init-file)
+    (setq initial-frame-alist                            ; 设置窗口大小
+          '((width . 135)
+            (height . 40)))
+#+end_src
+** minibuffer 配置
+#+begin_src emacs-lisp
+  (setq display-time-format "%Y年%m月%d日 %H:%M %A")
+  (setq display-time-default-load-average nil)
+  (display-time-mode 1)
+#+end_src
+** org 配置
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages          ; org 中快速运行代码
+   'org-babel-load-languages
+   '((python . t)
+     (C . t)))
+  (setq org-startup-with-latex-preview t)
+  (setq org-startup-numerated t)        ; 在 org 标题中添加序号
+  (setq org-hide-emphasis-markers t)    ; 自动隐藏标记符号
+#+end_src
+** ASCII 码显示
+#+begin_src emacs-lisp
+  (defun ascii()
+    "展示ascii码表"
+    (interactive)
+    (switch-to-buffer "*ASCII*")
+    (erase-buffer)
+    (setq buffer-read-only nil)        ;; Not need to edit the content, just read mode (added)
+    (local-set-key "q" 'bury-buffer)   ;; Nice to have the option to bury the buffer (added)
+    (setq lower32 '("nul" "soh" "stx" "etx" "eot" "enq" "ack" "bel"
+  		          "bs" "ht" "nl" "vt" "np" "cr" "so" "si"
+  		          "dle" "dc1" "dc2" "dc3" "dc4" "nak" "syn" "etb"
+  		          "can" "em" "sub" "esc" "fs" "gs" "rs" "us"
+  		          ))
+    (save-excursion (let ((i -1))
+                      (insert "ASCII characters 0 thru 127.\n\n")
+                      (insert " 十六进制  十进制  字符 |  十六进制  十进制  字符 |  十六进制  十进制  字符 | 十六进制  十进制  字符\n")
+                      (while (< i 31)
+                        (insert (format " %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s \n"
+                                        (setq i (+ 1  i)) i (elt lower32 i)
+                                        (setq i (+ 32 i)) i (single-key-description i)
+                                        (setq i (+ 32 i)) i (single-key-description i)
+                                        (setq i (+ 32 i)) i (single-key-description i)))
+                        (setq i (- i 96))))))
+#+end_src
+** eshell 配置
+#+begin_src emacs-lisp
+  (defun toggle-eshell()
+    (interactive)
+    (if (get-buffer-window "*eshell*")                 ; 如果 eshell 窗口已打开，则完全退出
+        (let ((buf (get-buffer "*eshell*")))
+          (when (get-buffer-process buf)               ; 如果 eshell 有进程，则杀死
+            (eshell-kill-process))
+          (kill-buffer buf)                            ; 杀死缓冲区
+          (delete-window (get-buffer-window buf)))     ; 关闭窗口
+      (let ((win (split-window-below 25)))             ; 否则，新建 eshell
+        (select-window win)
+        (eshell))))
+  (global-set-key (kbd "<f2>") 'toggle-eshell)
+
+  (setq eshell-banner-message "")                      ; 关闭 eshell 问候语
+#+end_src
+** 汇编配置
+#+begin_src emacs-lisp
+  (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
+  (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode))
+
+  (defun nasm-compile()
+    "自动使用 make 编译汇编"
+    (interactive)
+    (unless (file-exists-p "Makefile")
+      (error "No Makefile found in current directory"))
+    (compile "mingw32-make bochs"))
+#+end_src
+** 其他配置
+
+** 其他

@@ -3,8 +3,4 @@
 (setq custom-file (expand-file-name "~/.emacs.d/custom.el"))
 (load custom-file 'no-error 'no-message)
 
-(add-to-list 'load-path "~/.emacs.d/lisp/")
-
-(require 'basic)
-;(require 'plugin)
-(require 'myfun)
+(org-babel-load-file "~/.emacs.d/emacs.org")

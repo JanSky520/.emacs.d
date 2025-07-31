@@ -104,7 +104,7 @@
     :ensure t
     :hook (org-mode . org-fragtog-mode))
 #+end_src
-** 最近文件配置
+** 文件配置
 #+begin_src emacs-lisp
   (use-package recentf
     :init (recentf-mode 1)
@@ -133,22 +133,23 @@
 #+end_src
 ** 功能配置
 #+begin_src emacs-lisp
-    (setq make-backup-files nil)                         ; 关闭自动备份
-    (delete-selection-mode 1)                            ; 全选加强
-    (setq ring-bell-function 'ignore)                    ; 关掉哔哔声
-    (fset 'yes-or-no-p 'y-or-n-p)                        ; 快速 yes 或 no
-    (setq-default indent-tabs-mode nil)                  ; 启用 tab 键
-    (setq-default tab-width 4)                           ; 设置 tab 宽度
-    (defun open-init-file()
-      (interactive)
-      (find-file "~/.emacs.d/emacs.org"))
-    (defun open-file-config()
-      (let (((buffer (buffer-name)))
-            if ())))
-    (global-set-key (kbd "<f3>") 'open-init-file)
-    (setq initial-frame-alist                            ; 设置窗口大小
-          '((width . 135)
-            (height . 40)))
+  (setq make-backup-files nil)                         ; 关闭自动备份
+  (delete-selection-mode 1)                            ; 全选加强
+  (setq ring-bell-function 'ignore)                    ; 关掉哔哔声
+  (fset 'yes-or-no-p 'y-or-n-p)                        ; 快速 yes 或 no
+  (setq-default indent-tabs-mode nil)                  ; 启用 tab 键
+  (setq-default tab-width 4)                           ; 设置 tab 宽度
+  (defun open-file-config()
+    "打开配置文件"
+    (interactive)
+    (let ((buffer (buffer-name)))
+      (if (string= buffer "emacs.org")
+          (switch-to-buffer (other-buffer))
+        (find-file "~/.emacs.d/emacs.org"))))
+  (global-set-key (kbd "<f3>") 'open-file-config)
+  (setq initial-frame-alist                            ; 设置窗口大小
+        '((width . 135)
+          (height . 40)))
 #+end_src
 ** minibuffer 配置
 #+begin_src emacs-lisp
@@ -201,7 +202,7 @@
             (eshell-kill-process))
           (kill-buffer buf)                            ; 杀死缓冲区
           (delete-window (get-buffer-window buf)))     ; 关闭窗口
-      (let ((win (split-window-below 25)))             ; 否则，新建 eshell
+      (let ((win (split-window-below 30)))             ; 否则，新建 eshell
         (select-window win)
         (eshell))))
   (global-set-key (kbd "<f2>") 'toggle-eshell)
@@ -221,5 +222,4 @@
     (compile "mingw32-make bochs"))
 #+end_src
 ** 其他配置
-
 ** 其他

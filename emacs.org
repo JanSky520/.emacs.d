@@ -78,6 +78,9 @@
 #+begin_src emacs-lisp
   (use-package nerd-icons
     :ensure t)
+  (use-package catppuccin-theme
+    :ensure t
+    :init (load-theme 'catppuccin t))
   (use-package rainbow-delimiters
     :ensure t
     :hook (prog-mode . rainbow-delimiters-mode))
@@ -87,9 +90,6 @@
 #+end_src
 ** org 配置
 #+begin_src emacs-lisp
-  (use-package org-modern
-    :ensure t
-    :hook (org-mode . org-modern-mode))
   (use-package org-appear
     :ensure t
     :hook (org-mode . org-appear-mode)
@@ -103,6 +103,16 @@
   (use-package org-fragtog
     :ensure t
     :hook (org-mode . org-fragtog-mode))
+  (use-package org-superstar
+  :ensure t
+  :after org
+  :hook (org-mode . org-superstar-mode))
+  (use-package valign
+    :ensure t
+    :config
+    (setq valign-fancy-bar t)
+    (setq org-startup-align-all-tables t)
+    :hook (org-mode . valign-mode))
 #+end_src
 ** 文件配置
 #+begin_src emacs-lisp
@@ -123,13 +133,12 @@
   (tool-bar-mode -1)                                   ; 关闭工具栏
   (menu-bar-mode -1)                                   ; 关闭菜单栏
   (setq-default cursor-type 'bar)                      ; 更改光标样式
-  (load-theme 'modus-operandi-tinted t)                ; 设置主题
   (global-hl-line-mode t)                              ; 高亮当前行
   (scroll-bar-mode -1)                                 ; 关闭文件滑动控件
   (show-paren-mode t)                                  ; 括号匹配
   (electric-pair-mode 1)                               ; 括号补全
   (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ; 会将 lambda 等符号美化为 λ
-  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
+  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 10")
 #+end_src
 ** 功能配置
 #+begin_src emacs-lisp

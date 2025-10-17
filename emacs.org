@@ -9,8 +9,7 @@
 #+begin_src emacs-lisp
   (use-package package
     :config
-    (setq package-check-signature nil)
-    (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+    (add-to-list 'package-archives '("melpa" . "https://mirrors.tuna.tsinghua.edu.cn/elpa/melpa/"))
     (unless (bound-and-true-p package--initialized)
       (package-initialize)))
 #+end_src
@@ -50,6 +49,33 @@
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
+  (add-hook 'eshell-mode-hook (lambda ()                                   ; 在 eshell 中禁用自动补全
+                                (setq-local corfu-auto nil)
+                                (corfu-mode)))
+  (keymap-set corfu-map "RET" #'corfu-send)                           ; 免去一次回车
+  (use-package vertico
+    :ensure t
+    :custom
+    (vertico-scroll-margin 1)       ; 距离底部几行开始滚动
+    (vertico-count 10)              ; 显示候选列表行数
+    (vertico-resize t)              ; 调整候选列表的大小
+    (vertico-cycle t)               ; 循环列表
+    :init (vertico-mode))
+  (use-package orderless
+    :ensure t
+    :custom
+    (completion-styles '(orderless basic))
+    (completion-category-overrides '((file (styles basic partial-completion))))
+    (completion-category-defaults nil)
+    (completion-pcm-leading-wildcard t))
+  (use-package marginalia
+    :ensure t
+    :init (marginalia-mode))
+  (use-package consult
+    :ensure t
+    :bind (("C-s" . consult-line)
+           ("M-s" . consult-imenu)
+           ("C-x b" . consult-buffer)))
 #+end_src
 ** 快捷键提示
 #+begin_src emacs-lisp
@@ -72,7 +98,8 @@
     (setq dashboard-icon-type 'nerd-icons)
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
-    (setq dashboard-set-navigator t))
+    (setq dashboard-set-navigator t)
+    (setq dashboard-items '((recents . 10))))
 #+end_src
 ** 主题配置
 #+begin_src emacs-lisp
@@ -122,7 +149,14 @@
     (global-set-key (kbd "C-x C-b") 'recentf-open-files)
     (setq recentf-max-menu-item 10))
 #+end_src
-
+** eshell 配置
+#+begin_src emacs-lisp
+  (use-package eshell-syntax-highlighting
+    :after eshell-mode
+    :ensure t
+    :config
+    (eshell-syntax-highlighting-global-mode +1))
+#+end_src
 * 自定义函数
 ** 主题配置
 #+begin_src emacs-lisp
@@ -164,7 +198,9 @@
 #+begin_src emacs-lisp
   (setq display-time-format "%Y年%m月%d日 %H:%M %A")
   (setq display-time-default-load-average nil)
+  (setq battery-update-interval 1)
   (display-time-mode 1)
+  (display-battery-mode 1)
 #+end_src
 ** org 配置
 #+begin_src emacs-lisp
@@ -211,7 +247,7 @@
             (eshell-kill-process))
           (kill-buffer buf)                            ; 杀死缓冲区
           (delete-window (get-buffer-window buf)))     ; 关闭窗口
-      (let ((win (split-window-below 30)))             ; 否则，新建 eshell
+      (let ((win (split-window-below 36)))             ; 否则，新建 eshell
         (select-window win)
         (eshell))))
   (global-set-key (kbd "<f2>") 'toggle-eshell)

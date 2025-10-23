@@ -136,9 +136,7 @@
 #+begin_src emacs-lisp
   (use-package nerd-icons
     :ensure t)
-  (use-package catppuccin-theme
-    :ensure t
-    :init (load-theme 'catppuccin t))
+  (load-theme 'modus-operandi-tritanopia t)
   (use-package rainbow-delimiters
     :ensure t
     :hook (prog-mode . rainbow-delimiters-mode))
@@ -158,7 +156,7 @@
   (show-paren-mode t)                                  ; 括号匹配
   (electric-pair-mode 1)                               ; 括号补全
   (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ; 会将 lambda 等符号美化为 λ
-  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 10")
+  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
   (setq display-time-format "%Y年%m月%d日 %H:%M %A")
   (setq display-time-default-load-average nil)
   (setq battery-update-interval 1)
@@ -232,7 +230,7 @@
             (eshell-kill-process))
           (kill-buffer buf)                            ; 杀死缓冲区
           (delete-window (get-buffer-window buf)))     ; 关闭窗口
-      (let ((win (split-window-below 40)))             ; 否则，新建 eshell
+      (let ((win (split-window-below 36)))             ; 否则，新建 eshell
         (select-window win)
         (eshell))))
   (global-set-key (kbd "<f2>") 'toggle-eshell)

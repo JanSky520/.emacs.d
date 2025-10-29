@@ -1,11 +1,11 @@
-#+title:   elisp ÅäÖÃÎÄ¼ş
+#+title:   elisp é…ç½®æ–‡ä»¶
 #+author:  JanSky
 #+date:    2025-07-10
 #+STARTUP: overview indent
 
 
-* ²å¼şÔ´ÅäÖÃ
-#+begin_src emacs-lisp  ;; ²å¼şÇå»ªÔ´ÅäÖÃ
+* æ’ä»¶æºé…ç½®
+#+begin_src emacs-lisp  ;; æ’ä»¶æ¸…åæºé…ç½®
   (use-package package
     :config
     (add-to-list 'package-archives
@@ -13,15 +13,15 @@
     (unless (bound-and-true-p package--initialized)
       (package-initialize)))
 #+end_src
-* ¹¦ÄÜÅäÖÃ
+* åŠŸèƒ½é…ç½®
 #+begin_src emacs-lisp
   (use-package vertico
     :ensure t
     :custom
-    (vertico-scroll-margin 1)       ; ¾àÀëµ×²¿¼¸ĞĞ¿ªÊ¼¹ö¶¯
-    (vertico-count 10)              ; ÏÔÊ¾ºòÑ¡ÁĞ±íĞĞÊı
-    (vertico-resize t)              ; µ÷ÕûºòÑ¡ÁĞ±íµÄ´óĞ¡
-    (vertico-cycle t)               ; Ñ­»·ÁĞ±í
+    (vertico-scroll-margin 1)       ; è·ç¦»åº•éƒ¨å‡ è¡Œå¼€å§‹æ»šåŠ¨
+    (vertico-count 10)              ; æ˜¾ç¤ºå€™é€‰åˆ—è¡¨è¡Œæ•°
+    (vertico-resize t)              ; è°ƒæ•´å€™é€‰åˆ—è¡¨çš„å¤§å°
+    (vertico-cycle t)               ; å¾ªç¯åˆ—è¡¨
     :init (vertico-mode))
   (use-package orderless
     :ensure t
@@ -39,25 +39,25 @@
            ("M-s" . consult-imenu)
            ("C-x b" . consult-buffer)))
 
-  (setq make-backup-files nil)                         ; ¹Ø±Õ×Ô¶¯±¸·İ
-  (delete-selection-mode 1)                            ; È«Ñ¡¼ÓÇ¿
-  (setq ring-bell-function 'ignore)                    ; ¹ØµôßÙßÙÉù
-  (fset 'yes-or-no-p 'y-or-n-p)                        ; ¿ìËÙ yes »ò no
-  (setq-default indent-tabs-mode nil)                  ; ÆôÓÃ tab ¼ü
-  (setq-default tab-width 4)                           ; ÉèÖÃ tab ¿í¶È
+  (setq make-backup-files nil)                         ; å…³é—­è‡ªåŠ¨å¤‡ä»½
+  (delete-selection-mode 1)                            ; å…¨é€‰åŠ å¼º
+  (setq ring-bell-function 'ignore)                    ; å…³æ‰å“”å“”å£°
+  (fset 'yes-or-no-p 'y-or-n-p)                        ; å¿«é€Ÿ yes æˆ– no
+  (setq-default indent-tabs-mode nil)                  ; å¯ç”¨ tab é”®
+  (setq-default tab-width 4)                           ; è®¾ç½® tab å®½åº¦
   (defun open-file-config()
-    "´ò¿ªÅäÖÃÎÄ¼ş"
+    "æ‰“å¼€é…ç½®æ–‡ä»¶"
     (interactive)
     (let ((buffer (buffer-name)))
       (if (string= buffer "emacs.org")
           (switch-to-buffer (other-buffer))
         (find-file "~/.emacs.d/emacs.org"))))
   (global-set-key (kbd "<f3>") 'open-file-config)
-  (setq initial-frame-alist                            ; ÉèÖÃ´°¿Ú´óĞ¡
+  (setq initial-frame-alist                            ; è®¾ç½®çª—å£å¤§å°
         '((width . 135)
           (height . 40)))
 #+end_src
-* ´úÂëÅäÖÃ
+* ä»£ç é…ç½®
 #+begin_src emacs-lisp
   (use-package treesit-auto
     :ensure t
@@ -94,36 +94,36 @@
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
 
-  (add-hook 'eshell-mode-hook (lambda ()                                   ; ÔÚ eshell ÖĞ½ûÓÃ×Ô¶¯²¹È«
+  (add-hook 'eshell-mode-hook (lambda ()                                   ; åœ¨ eshell ä¸­ç¦ç”¨è‡ªåŠ¨è¡¥å…¨
                                 (setq-local corfu-auto nil)
                                 (corfu-mode)))
-  (keymap-set corfu-map "RET" #'corfu-send)                           ; ÃâÈ¥Ò»´Î»Ø³µ
+  (keymap-set corfu-map "RET" #'corfu-send)                           ; å…å»ä¸€æ¬¡å›è½¦
   (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
   (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode))
   (defun nasm-compile()
-    "×Ô¶¯Ê¹ÓÃ make ±àÒë»ã±à"
+    "è‡ªåŠ¨ä½¿ç”¨ make ç¼–è¯‘æ±‡ç¼–"
     (interactive)
     (unless (file-exists-p "Makefile")
       (error "No Makefile found in current directory"))
     (compile "mingw32-make bochs"))
 
 #+end_src
-* ¿ì½İ¼üÌáÊ¾
+* å¿«æ·é”®æç¤º
 #+begin_src emacs-lisp
   (use-package which-key
     :config
     (which-key-mode 1))
 #+end_src
-* Æô¶¯Ãæ°å
+* å¯åŠ¨é¢æ¿
 #+begin_src emacs-lisp
   (use-package dashboard
     :ensure t
     :config
     (dashboard-setup-startup-hook)
     :init
-    (setq dashboard-banner-logo-title "ÄãÈô°²ºÃ£¬±ãÊÇÇçÌì")
-    (setq dashboard-init-info "ÖĞ¹ú¿ÆÑ§Ôº´óÑ§ÉòÑô¼ÆËã¼¼ÊõÑĞ¾¿Ëù")
-    (setq dashboard-footer-messages '("ÂäÏ¼Óë¹ÂğÍÆë·É ÇïË®¹²³¤ÌìÒ»É«"))
+    (setq dashboard-banner-logo-title "ä½ è‹¥å®‰å¥½ï¼Œä¾¿æ˜¯æ™´å¤©")
+    (setq dashboard-init-info "ä¸­å›½ç§‘å­¦é™¢å¤§å­¦æ²ˆé˜³è®¡ç®—æŠ€æœ¯ç ”ç©¶æ‰€")
+    (setq dashboard-footer-messages '("è½éœä¸å­¤é¹œé½é£ ç§‹æ°´å…±é•¿å¤©ä¸€è‰²"))
     (setq dashboard-startup-banner 'official)
     (setq dashboard-display-icons-p t)
     (setq dashboard-icon-type 'nerd-icons)
@@ -132,38 +132,46 @@
     (setq dashboard-set-navigator t)
     (setq dashboard-items '((recents . 10))))
 #+end_src
-* Ö÷ÌâÅäÖÃ
+* ä¸»é¢˜é…ç½®
 #+begin_src emacs-lisp
   (use-package nerd-icons
     :ensure t)
-  (load-theme 'modus-operandi-tritanopia t)
+  (use-package catppuccin-theme
+    :ensure t
+    :config
+    (setq catppuccin-flavor 'latte)
+    (load-theme 'catppuccin t))
   (use-package rainbow-delimiters
     :ensure t
     :hook (prog-mode . rainbow-delimiters-mode))
   (use-package doom-modeline
     :ensure t
-    :init (doom-modeline-mode t))
+    :config (doom-modeline-mode t))
+  (use-package hyprlang-ts-mode
+    :ensure t
+    :custom (hyprlang-ts-mode-indent-offset 4)
+    :init (add-to-list 'treesit-language-source-alist '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")))
 
-  (setq inhibit-startup-screen t)                      ; ¹Ø±Õ¿ªÊ¼½çÃæ
-  (global-display-line-numbers-mode 1)                 ; ÏÔÊ¾ĞĞºÅ
-  (setq display-line-numbers-width-start t)            ; ¶¯Ì¬µ÷ÕûĞĞºÅ¿í¶È
-  (setq display-line-numbers-grow-only t)              ; ĞĞºÅ¿í¶ÈÖ»Ôö²»¼õ£¨¼õÉÙ¶¶¶¯£©
-  (tool-bar-mode -1)                                   ; ¹Ø±Õ¹¤¾ßÀ¸
-  (menu-bar-mode -1)                                   ; ¹Ø±Õ²Ëµ¥À¸
-  (setq-default cursor-type 'bar)                      ; ¸ü¸Ä¹â±êÑùÊ½
-  (global-hl-line-mode t)                              ; ¸ßÁÁµ±Ç°ĞĞ
-  (scroll-bar-mode -1)                                 ; ¹Ø±ÕÎÄ¼ş»¬¶¯¿Ø¼ş
-  (show-paren-mode t)                                  ; À¨ºÅÆ¥Åä
-  (electric-pair-mode 1)                               ; À¨ºÅ²¹È«
-  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ; »á½« lambda µÈ·ûºÅÃÀ»¯Îª ¦Ë
+  (setq inhibit-startup-screen t)                      ;; å…³é—­å¼€å§‹ç•Œé¢
+  (global-display-line-numbers-mode 1)                 ;; æ˜¾ç¤ºè¡Œå·
+  (setq display-line-numbers-width-start t)            ;; åŠ¨æ€è°ƒæ•´è¡Œå·å®½åº¦
+  (setq display-line-numbers-grow-only t)              ;; è¡Œå·å®½åº¦åªå¢ä¸å‡ï¼ˆå‡å°‘æŠ–åŠ¨ï¼‰
+  (tool-bar-mode -1)                                   ;; å…³é—­å·¥å…·æ 
+  (menu-bar-mode -1)                                   ;; å…³é—­èœå•æ 
+  (setq-default cursor-type 'bar)                      ;; æ›´æ”¹å…‰æ ‡æ ·å¼
+  (global-hl-line-mode t)                              ;; é«˜äº®å½“å‰è¡Œ
+  (scroll-bar-mode -1)                                 ;; å…³é—­æ–‡ä»¶æ»‘åŠ¨æ§ä»¶
+  (show-paren-mode t)                                  ;; æ‹¬å·åŒ¹é…
+  (electric-pair-mode 1)                               ;; æ‹¬å·è¡¥å…¨
+  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ;; ä¼šå°† lambda ç­‰ç¬¦å·ç¾åŒ–ä¸º Î»
   (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
-  (setq display-time-format "%YÄê%mÔÂ%dÈÕ %H:%M %A")
+  (setq display-time-format "%Yå¹´%mæœˆ%dæ—¥ %H:%M %A")
   (setq display-time-default-load-average nil)
   (setq battery-update-interval 1)
   (display-time-mode 1)
   (display-battery-mode 1)
 #+end_src
-* org ÅäÖÃ
+* org é…ç½®
 #+begin_src emacs-lisp
   (use-package org-appear
     :ensure t
@@ -189,20 +197,20 @@
     (setq org-startup-align-all-tables t)
     :hook (org-mode . valign-mode))
 
-  (org-babel-do-load-languages          ; org ÖĞ¿ìËÙÔËĞĞ´úÂë
+  (org-babel-do-load-languages          ; org ä¸­å¿«é€Ÿè¿è¡Œä»£ç 
    'org-babel-load-languages
    '((python . t)
      (C . t)))
   (setq org-startup-with-latex-preview t)
-  (setq org-startup-numerated t)        ; ÔÚ org ±êÌâÖĞÌí¼ÓĞòºÅ
-  (setq org-hide-emphasis-markers t)    ; ×Ô¶¯Òş²Ø±ê¼Ç·ûºÅ
+  (setq org-startup-numerated t)        ; åœ¨ org æ ‡é¢˜ä¸­æ·»åŠ åºå·
+  (setq org-hide-emphasis-markers t)    ; è‡ªåŠ¨éšè—æ ‡è®°ç¬¦å·
 #+end_src
-* git ÅäÖÃ
+* git é…ç½®
 #+begin_src emacs-lisp
   (use-package magit
   :ensure t)
 #+end_src
-* ÎÄ¼şÅäÖÃ
+* æ–‡ä»¶é…ç½®
 #+begin_src emacs-lisp
   (use-package recentf
     :init (recentf-mode 1)
@@ -210,7 +218,7 @@
     (global-set-key (kbd "C-x C-b") 'recentf-open-files)
     (setq recentf-max-menu-item 10))
 #+end_src
-* eshell ÅäÖÃ
+* eshell é…ç½®
 #+begin_src emacs-lisp
   (use-package esh-autosuggest
   :hook (eshell-mode . esh-autosuggest-mode)
@@ -224,24 +232,24 @@
 
   (defun toggle-eshell()
     (interactive)
-    (if (get-buffer-window "*eshell*")                 ; Èç¹û eshell ´°¿ÚÒÑ´ò¿ª£¬ÔòÍêÈ«ÍË³ö
+    (if (get-buffer-window "*eshell*")                 ; å¦‚æœ eshell çª—å£å·²æ‰“å¼€ï¼Œåˆ™å®Œå…¨é€€å‡º
         (let ((buf (get-buffer "*eshell*")))
-          (when (get-buffer-process buf)               ; Èç¹û eshell ÓĞ½ø³Ì£¬ÔòÉ±ËÀ
+          (when (get-buffer-process buf)               ; å¦‚æœ eshell æœ‰è¿›ç¨‹ï¼Œåˆ™æ€æ­»
             (eshell-kill-process))
-          (kill-buffer buf)                            ; É±ËÀ»º³åÇø
-          (delete-window (get-buffer-window buf)))     ; ¹Ø±Õ´°¿Ú
-      (let ((win (split-window-below 36)))             ; ·ñÔò£¬ĞÂ½¨ eshell
+          (kill-buffer buf)                            ; æ€æ­»ç¼“å†²åŒº
+          (delete-window (get-buffer-window buf)))     ; å…³é—­çª—å£
+      (let ((win (split-window-below 30)))             ; å¦åˆ™ï¼Œæ–°å»º eshell
         (select-window win)
         (eshell))))
   (global-set-key (kbd "<f2>") 'toggle-eshell)
   (with-eval-after-load 'esh-module
-    (eshell/alias "ls" "eza -1 -al --icons")
+    (eshell/alias "ls" "eza -al --icons")
     (eshell/alias "cls" "clear-scrollback"))
 #+end_src
-* ASCII ÂëÏÔÊ¾
+* ASCII ç æ˜¾ç¤º
 #+begin_src emacs-lisp
   (defun ascii()
-    "Õ¹Ê¾asciiÂë±í"
+    "å±•ç¤ºasciiç è¡¨"
     (interactive)
     (switch-to-buffer "*ASCII*")
     (erase-buffer)
@@ -254,7 +262,7 @@
   		          ))
     (save-excursion (let ((i -1))
                       (insert "ASCII characters 0 thru 127.\n\n")
-                      (insert " Ê®Áù½øÖÆ  Ê®½øÖÆ  ×Ö·û |  Ê®Áù½øÖÆ  Ê®½øÖÆ  ×Ö·û |  Ê®Áù½øÖÆ  Ê®½øÖÆ  ×Ö·û | Ê®Áù½øÖÆ  Ê®½øÖÆ  ×Ö·û\n")
+                      (insert " åå…­è¿›åˆ¶  åè¿›åˆ¶  å­—ç¬¦ |  åå…­è¿›åˆ¶  åè¿›åˆ¶  å­—ç¬¦ |  åå…­è¿›åˆ¶  åè¿›åˆ¶  å­—ç¬¦ | åå…­è¿›åˆ¶  åè¿›åˆ¶  å­—ç¬¦\n")
                       (while (< i 31)
                         (insert (format " %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s \n"
                                         (setq i (+ 1  i)) i (elt lower32 i)

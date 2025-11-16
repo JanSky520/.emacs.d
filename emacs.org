@@ -4,6 +4,39 @@
 #+STARTUP: overview indent
 
 
+* 基础配置
+#+begin_src emacs-lisp
+  (setq inhibit-startup-screen t)                      ;; 关闭开始界面
+  (global-display-line-numbers-mode 1)                 ;; 显示行号
+  (setq display-line-numbers-width-start t)            ;; 动态调整行号宽度
+  (setq display-line-numbers-grow-only t)              ;; 行号宽度只增不减（减少抖动）
+  (tool-bar-mode -1)                                   ;; 关闭工具栏
+  (menu-bar-mode -1)                                   ;; 关闭菜单栏
+  (setq-default cursor-type 'bar)                      ;; 更改光标样式
+  (global-hl-line-mode t)                              ;; 高亮当前行
+  (scroll-bar-mode -1)                                 ;; 关闭文件滑动控件
+  (show-paren-mode t)                                  ;; 括号匹配
+  (electric-pair-mode 1)                               ;; 括号补全
+  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ;; 会将 lambda 等符号美化为 λ
+  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
+  (setq make-backup-files nil)                         ;; 关闭自动备份
+  (delete-selection-mode 1)                            ;; 全选加强
+  (setq ring-bell-function 'ignore)                    ;; 关掉哔哔声
+  (fset 'yes-or-no-p 'y-or-n-p)                        ;; 快速 yes 或 no
+  (setq-default indent-tabs-mode nil)                  ;; 启用 tab 键
+  (setq-default tab-width 4)                           ;; 设置 tab 宽度
+  (defun open-file-config()
+    "打开配置文件"
+    (interactive)
+    (let ((buffer (buffer-name)))
+      (if (string= buffer "emacs.org")
+          (switch-to-buffer (other-buffer))
+        (find-file "~/.emacs.d/emacs.org"))))
+  (global-set-key (kbd "<f3>") 'open-file-config)
+  (setq initial-frame-alist                            ; 设置窗口大小
+        '((width . 135)
+          (height . 40)))
+#+end_src
 * 插件源配置
 #+begin_src emacs-lisp  ;; 插件清华源配置
   (use-package package
@@ -38,24 +71,6 @@
     :bind (("C-s" . consult-line)
            ("M-s" . consult-imenu)
            ("C-x b" . consult-buffer)))
-
-  (setq make-backup-files nil)                         ; 关闭自动备份
-  (delete-selection-mode 1)                            ; 全选加强
-  (setq ring-bell-function 'ignore)                    ; 关掉哔哔声
-  (fset 'yes-or-no-p 'y-or-n-p)                        ; 快速 yes 或 no
-  (setq-default indent-tabs-mode nil)                  ; 启用 tab 键
-  (setq-default tab-width 4)                           ; 设置 tab 宽度
-  (defun open-file-config()
-    "打开配置文件"
-    (interactive)
-    (let ((buffer (buffer-name)))
-      (if (string= buffer "emacs.org")
-          (switch-to-buffer (other-buffer))
-        (find-file "~/.emacs.d/emacs.org"))))
-  (global-set-key (kbd "<f3>") 'open-file-config)
-  (setq initial-frame-alist                            ; 设置窗口大小
-        '((width . 135)
-          (height . 40)))
 #+end_src
 * 代码配置
 #+begin_src emacs-lisp
@@ -68,6 +83,9 @@
     (global-treesit-auto-mode))
   (use-package nasm-mode
     :ensure t
+    :init
+    (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
+    (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode))
     :mode ("\\.asm\\'" "\\.inc\\'")
     :config (define-key nasm-mode-map (kbd "C-c C-c") 'nasm-compile))
   (use-package corfu
@@ -93,20 +111,6 @@
     (add-hook 'completion-at-point-functions #'cape-dabbrev)
     (add-hook 'completion-at-point-functions #'cape-file)
     (add-hook 'completion-at-point-functions #'cape-elisp-block))
-
-  (add-hook 'eshell-mode-hook (lambda ()                                   ; 在 eshell 中禁用自动补全
-                                (setq-local corfu-auto nil)
-                                (corfu-mode)))
-  (keymap-set corfu-map "RET" #'corfu-send)                           ; 免去一次回车
-  (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
-  (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode))
-  (defun nasm-compile()
-    "自动使用 make 编译汇编"
-    (interactive)
-    (unless (file-exists-p "Makefile")
-      (error "No Makefile found in current directory"))
-    (compile "mingw32-make bochs"))
-
 #+end_src
 * 快捷键提示
 #+begin_src emacs-lisp
@@ -146,30 +150,17 @@
     :hook (prog-mode . rainbow-delimiters-mode))
   (use-package doom-modeline
     :ensure t
+    :init
+    (setq display-time-format "%Y年%m月%d日 %H:%M %A")
+    (setq display-time-default-load-average nil)
+    (setq battery-update-interval 1)
+    (display-time-mode 1)
+    (display-battery-mode 1)
     :config (doom-modeline-mode t))
   (use-package hyprlang-ts-mode
     :ensure t
     :custom (hyprlang-ts-mode-indent-offset 4)
     :init (add-to-list 'treesit-language-source-alist '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")))
-
-  (setq inhibit-startup-screen t)                      ;; 关闭开始界面
-  (global-display-line-numbers-mode 1)                 ;; 显示行号
-  (setq display-line-numbers-width-start t)            ;; 动态调整行号宽度
-  (setq display-line-numbers-grow-only t)              ;; 行号宽度只增不减（减少抖动）
-  (tool-bar-mode -1)                                   ;; 关闭工具栏
-  (menu-bar-mode -1)                                   ;; 关闭菜单栏
-  (setq-default cursor-type 'bar)                      ;; 更改光标样式
-  (global-hl-line-mode t)                              ;; 高亮当前行
-  (scroll-bar-mode -1)                                 ;; 关闭文件滑动控件
-  (show-paren-mode t)                                  ;; 括号匹配
-  (electric-pair-mode 1)                               ;; 括号补全
-  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ;; 会将 lambda 等符号美化为 λ
-  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
-  (setq display-time-format "%Y年%m月%d日 %H:%M %A")
-  (setq display-time-default-load-average nil)
-  (setq battery-update-interval 1)
-  (display-time-mode 1)
-  (display-battery-mode 1)
 #+end_src
 * org 配置
 #+begin_src emacs-lisp
@@ -187,9 +178,9 @@
     :ensure t
     :hook (org-mode . org-fragtog-mode))
   (use-package org-superstar
-  :ensure t
-  :after org
-  :hook (org-mode . org-superstar-mode))
+    :ensure t
+    :after org
+    :hook (org-mode . org-superstar-mode))
   (use-package valign
     :ensure t
     :config
@@ -221,8 +212,8 @@
 * eshell 配置
 #+begin_src emacs-lisp
   (use-package esh-autosuggest
-  :hook (eshell-mode . esh-autosuggest-mode)
-  :ensure t)
+    :hook (eshell-mode . esh-autosuggest-mode)
+    :ensure t)
   (use-package eshell-syntax-highlighting
     :ensure t
     :config
@@ -242,11 +233,13 @@
         (select-window win)
         (eshell))))
   (global-set-key (kbd "<f2>") 'toggle-eshell)
-  (with-eval-after-load 'esh-module
-    (eshell/alias "ls" "eza -al --icons")
-    (eshell/alias "cls" "clear-scrollback"))
+
+  (add-hook 'eshell-mode-hook (lambda ()                                   ; 在 eshell 中禁用自动补全
+                                (setq-local corfu-auto nil)
+                                (corfu-mode)))
+  (keymap-set corfu-map "RET" #'corfu-send)                           ; 免去一次回车
 #+end_src
-* ASCII 码显示
+* 自定义功能
 #+begin_src emacs-lisp
   (defun ascii()
     "展示ascii码表"
@@ -270,4 +263,11 @@
                                         (setq i (+ 32 i)) i (single-key-description i)
                                         (setq i (+ 32 i)) i (single-key-description i)))
                         (setq i (- i 96))))))
+
+  (defun nasm-compile()
+    "自动使用 make 编译汇编"
+    (interactive)
+    (unless (file-exists-p "Makefile")
+      (error "No Makefile found in current directory"))
+    (compile "mingw32-make bochs"))
 #+end_src

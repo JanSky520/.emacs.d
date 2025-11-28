@@ -4,3 +4,4 @@
 (load custom-file 'no-error 'no-message)
 
 (org-babel-load-file "~/.emacs.d/emacs.org")
+(put 'set-goal-column 'disabled nil)

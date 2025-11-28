@@ -25,17 +25,7 @@
   (fset 'yes-or-no-p 'y-or-n-p)                        ;; 快速 yes 或 no
   (setq-default indent-tabs-mode nil)                  ;; 启用 tab 键
   (setq-default tab-width 4)                           ;; 设置 tab 宽度
-  (defun open-file-config()
-    "打开配置文件"
-    (interactive)
-    (let ((buffer (buffer-name)))
-      (if (string= buffer "emacs.org")
-          (switch-to-buffer (other-buffer))
-        (find-file "~/.emacs.d/emacs.org"))))
-  (global-set-key (kbd "<f3>") 'open-file-config)
-  (setq initial-frame-alist                            ; 设置窗口大小
-        '((width . 135)
-          (height . 40)))
+  (minibuffer-electric-default-mode 1)                 ;; minibuffer 增强功能
 #+end_src
 * 插件源配置
 #+begin_src emacs-lisp  ;; 插件清华源配置
@@ -115,8 +105,62 @@
 * 快捷键提示
 #+begin_src emacs-lisp
   (use-package which-key
-    :config
-    (which-key-mode 1))
+    :init
+    (define-key global-map (kbd "<f2>") '("打开 Eshell" . toggle-eshell))
+    (define-key global-map (kbd "<f3>") '("打开配置文件" . open-file-config))
+    :config (which-key-mode 1))
+
+  (which-key-add-key-based-replacements
+    "C-x 0" "关闭当前窗口"
+    "C-x 1" "关闭其他窗口"
+    "C-x 2" "底部分屏"
+    "C-x 3" "右侧分屏"
+    "C-x =" "光标位置字符信息"
+    "C-x u" "撤销一次更改"
+    "C-x C-c" "退出"
+    "C-x C-f" "查找文件"
+    "C-x C-o" "删除光标上下空白行"
+    "C-x C-s" "保存文件"
+    "C-h a" "按关键词搜索命令"
+    "C-h b" "显示所有按键绑定"
+    "C-h c" "快速显示快捷键功能"
+    "C-h C" "描述编码系统"
+    "C-h d" "按关键词搜索所有"
+    "C-h e" "显示缓冲区"
+    "C-h f" "查询 elisp 函数文档"
+    "C-h F" "打开指定命令文档"
+    "C-h g" "打开 GUN 项目网页"
+    "C-h h" "打开 hello 页面"
+    "C-h i" "打开 info 手册"
+    "C-h I" "输入法文档"
+    "C-h k" "快捷键描述"
+    "C-h K" "按快捷键搜索文档"
+    "C-h l" "最近 300 次按键使用"
+    "C-h L" "显示语言环境相关"
+    "C-h m" "当前 mode 的描述文档"
+    "C-h n" "最近 emacs 更改新闻"
+    "C-h o" "光标下的 elisp 函数文档"
+    "C-h p" "搜索已安装的内置包"
+    "C-h P" "显示可安装的插件"
+    "C-h q" "帮助退出"
+    "C-h r" "打开 emacs 手册"
+    "C-h R" "打开 info 手册"
+    "C-h s" "当前缓冲区的语法表"
+    "C-h S" "显示编程语言符号文档"
+    "C-h t" "emacs 快速指南"
+    "C-h v" "elisp 变量文档"
+    "C-h w" "查找命令绑定的快捷键"
+    "C-h x" "显示指定命令的文档"
+    "C-h ." "光标位置局部帮助信息"
+    "C-h ?" "帮助命令菜单"
+    "C-h <f1>" "帮助命令菜单"
+    "C-h C-f" "打开 Emacs FAQ"
+    "C-h C-h" "帮助命令菜单"
+    "C-h C-q" "常用命令及其按键绑定"
+    "M-g TAB" "跳转指定列"
+    "M-g c" "跳转指定字符数"
+    "M-g g" "跳转指定行"
+    "M-g M-g" "跳转指定行")
 #+end_src
 * 启动面板
 #+begin_src emacs-lisp
@@ -143,7 +187,7 @@
   (use-package catppuccin-theme
     :ensure t
     :config
-    (setq catppuccin-flavor 'latte)
+    (setq catppuccin-flavor 'mocha)
     (load-theme 'catppuccin t))
   (use-package rainbow-delimiters
     :ensure t
@@ -232,7 +276,8 @@
       (let ((win (split-window-below 30)))             ; 否则，新建 eshell
         (select-window win)
         (eshell))))
-  (global-set-key (kbd "<f2>") 'toggle-eshell)
+
+  ;;(define-key global-map (kbd "<f2>") '("打开 Eshell" . toggle-eshell))
 
   (add-hook 'eshell-mode-hook (lambda ()                                   ; 在 eshell 中禁用自动补全
                                 (setq-local corfu-auto nil)
@@ -269,5 +314,13 @@
     (interactive)
     (unless (file-exists-p "Makefile")
       (error "No Makefile found in current directory"))
-    (compile "mingw32-make bochs"))
+    (compile "make bochs"))
+
+  (defun open-file-config()
+    "打开配置文件"
+    (interactive)
+    (let ((buffer (buffer-name)))
+      (if (string= buffer "emacs.org")
+          (switch-to-buffer (other-buffer))
+        (find-file "~/.emacs.d/emacs.org"))))
 #+end_src

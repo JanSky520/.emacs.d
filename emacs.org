@@ -36,72 +36,6 @@
     (unless (bound-and-true-p package--initialized)
       (package-initialize)))
 #+end_src
-* 功能配置
-#+begin_src emacs-lisp
-  (use-package vertico
-    :ensure t
-    :custom
-    (vertico-scroll-margin 1)       ; 距离底部几行开始滚动
-    (vertico-count 10)              ; 显示候选列表行数
-    (vertico-resize t)              ; 调整候选列表的大小
-    (vertico-cycle t)               ; 循环列表
-    :init (vertico-mode))
-  (use-package orderless
-    :ensure t
-    :custom
-    (completion-styles '(orderless basic))
-    (completion-category-overrides '((file (styles basic partial-completion))))
-    (completion-category-defaults nil)
-    (completion-pcm-leading-wildcard t))
-  (use-package marginalia
-    :ensure t
-    :init (marginalia-mode))
-  (use-package consult
-    :ensure t
-    :bind (("C-s" . consult-line)
-           ("M-s" . consult-imenu)
-           ("C-x b" . consult-buffer)))
-#+end_src
-* 代码配置
-#+begin_src emacs-lisp
-  (use-package treesit-auto
-    :ensure t
-    :demand t
-    :config
-    (setq treesit-auto-install 'prompt)
-    (setq treesit-font-lock-level 4)
-    (global-treesit-auto-mode))
-  (use-package nasm-mode
-    :ensure t
-    :init
-    (add-to-list 'auto-mode-alist '("\\.bin\\'" . hexl-mode))
-    (add-to-list 'auto-mode-alist '("\\.img\\'" . hexl-mode))
-    :mode ("\\.asm\\'" "\\.inc\\'")
-    :config (define-key nasm-mode-map (kbd "C-c C-c") 'nasm-compile))
-  (use-package corfu
-    :ensure t
-    :hook (after-init . global-corfu-mode)
-    :init
-    (progn
-      (setq corfu-auto t)
-      (setq corfu-cycle t)
-      (setq corfu-quit-at-boundary t)
-      (setq corfu-quit-no-match t)
-      (setq corfu-preview-current t)
-      (setq corfu-min-width 40)
-      (setq corfu-max-width 50)
-      (setq corfu-auto-delay 0.2)
-      (setq corfu-auto-prefix 1)
-      (setq corfu-on-exact-match nil)
-      (setq corfu-preselect 'promt)
-      (corfu-popupinfo-mode)))
-  (use-package cape
-    :ensure t
-    :init
-    (add-hook 'completion-at-point-functions #'cape-dabbrev)
-    (add-hook 'completion-at-point-functions #'cape-file)
-    (add-hook 'completion-at-point-functions #'cape-elisp-block))
-#+end_src
 * 快捷键提示
 #+begin_src emacs-lisp
   (use-package which-key
@@ -180,32 +114,6 @@
     (setq dashboard-set-navigator t)
     (setq dashboard-items '((recents . 10))))
 #+end_src
-* 主题配置
-#+begin_src emacs-lisp
-  (use-package nerd-icons
-    :ensure t)
-  (use-package catppuccin-theme
-    :ensure t
-    :config
-    (setq catppuccin-flavor 'mocha)
-    (load-theme 'catppuccin t))
-  (use-package rainbow-delimiters
-    :ensure t
-    :hook (prog-mode . rainbow-delimiters-mode))
-  (use-package doom-modeline
-    :ensure t
-    :init
-    (setq display-time-format "%Y年%m月%d日 %H:%M %A")
-    (setq display-time-default-load-average nil)
-    (setq battery-update-interval 1)
-    (display-time-mode 1)
-    (display-battery-mode 1)
-    :config (doom-modeline-mode t))
-  (use-package hyprlang-ts-mode
-    :ensure t
-    :custom (hyprlang-ts-mode-indent-offset 4)
-    :init (add-to-list 'treesit-language-source-alist '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang")))
-#+end_src
 * org 配置
 #+begin_src emacs-lisp
   (use-package org-appear
@@ -278,11 +186,6 @@
         (eshell))))
 
   ;;(define-key global-map (kbd "<f2>") '("打开 Eshell" . toggle-eshell))
-
-  (add-hook 'eshell-mode-hook (lambda ()                                   ; 在 eshell 中禁用自动补全
-                                (setq-local corfu-auto nil)
-                                (corfu-mode)))
-  (keymap-set corfu-map "RET" #'corfu-send)                           ; 免去一次回车
 #+end_src
 * 自定义功能
 #+begin_src emacs-lisp

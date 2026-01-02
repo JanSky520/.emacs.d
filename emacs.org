@@ -6,55 +6,473 @@
 
 * 基础配置
 #+begin_src emacs-lisp
-  (setq inhibit-startup-screen t)                      ;; 关闭开始界面
-  (global-display-line-numbers-mode 1)                 ;; 显示行号
-  (setq display-line-numbers-width-start t)            ;; 动态调整行号宽度
-  (setq display-line-numbers-grow-only t)              ;; 行号宽度只增不减（减少抖动）
-  (tool-bar-mode -1)                                   ;; 关闭工具栏
-  (menu-bar-mode -1)                                   ;; 关闭菜单栏
-  (setq-default cursor-type 'bar)                      ;; 更改光标样式
-  (global-hl-line-mode t)                              ;; 高亮当前行
-  (scroll-bar-mode -1)                                 ;; 关闭文件滑动控件
-  (show-paren-mode t)                                  ;; 括号匹配
-  (electric-pair-mode 1)                               ;; 括号补全
-  (add-hook 'prog-mode-hook 'prettify-symbols-mode)    ;; 会将 lambda 等符号美化为 λ
-  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")
-  (setq make-backup-files nil)                         ;; 关闭自动备份
-  (delete-selection-mode 1)                            ;; 全选加强
-  (setq ring-bell-function 'ignore)                    ;; 关掉哔哔声
-  (fset 'yes-or-no-p 'y-or-n-p)                        ;; 快速 yes 或 no
-  (setq-default indent-tabs-mode nil)                  ;; 启用 tab 键
-  (setq-default tab-width 4)                           ;; 设置 tab 宽度
-  (minibuffer-electric-default-mode 1)                 ;; minibuffer 增强功能
+  (setq inhibit-startup-screen t)                                     ;; 关闭开始界面
+  (global-display-line-numbers-mode 1)                                ;; 显示行号
+  (setq display-line-numbers-width-start t)                           ;; 动态调整行号宽度
+  (setq display-line-numbers-grow-only t)                             ;; 行号宽度只增不减（减少抖动）
+  (tool-bar-mode -1)                                                  ;; 关闭工具栏
+  (menu-bar-mode -1)                                                  ;; 关闭菜单栏
+  (setq-default cursor-type 'bar)                                     ;; 更改光标样式
+  (global-hl-line-mode t)                                             ;; 高亮当前行
+  (scroll-bar-mode -1)                                                ;; 关闭文件滑动控件
+  (show-paren-mode t)                                                 ;; 括号匹配
+  (electric-pair-mode 1)                                              ;; 括号补全
+  (add-hook 'prog-mode-hook 'prettify-symbols-mode)                   ;; 会将 lambda 等符号美化为 λ
+  (set-face-attribute 'default nil :font "Sarasa Term SC Nerd 12")    ;; 设置字体
+  (setq make-backup-files nil)                                        ;; 关闭自动备份
+  (delete-selection-mode 1)                                           ;; 全选加强
+  (setq ring-bell-function 'ignore)                                   ;; 关掉哔哔声
+  (fset 'yes-or-no-p 'y-or-n-p)                                       ;; 快速 yes 或 no
+  (setq-default indent-tabs-mode nil)                                 ;; 启用 tab 键
+  (setq default-frame-alist '((width . 130) (height . 40)))           ;; 设置窗口大小
+  (setq-default truncate-lines t)                                     ;; 禁用单行过长时自动换行
 #+end_src
+
 * 插件源配置
-#+begin_src emacs-lisp  ;; 插件清华源配置
+#+begin_src emacs-lisp
   (use-package package
     :config
-    (add-to-list 'package-archives
-                 '("melpa" ."https://melpa.org/packages/"))
-    (unless (bound-and-true-p package--initialized)
-      (package-initialize)))
+    (setq package-archives '(("melpa" . "https://melpa.org/packages/")))
+    (setq package-check-signature nil)
+    (package-initialize))
 #+end_src
+
+* modeline配置
+#+begin_src emacs-lisp
+  (size-indication-mode t)                                            ;; 显示文件大小
+  (line-number-mode -1)                                               ;; 关闭行号显示
+  (column-number-mode t)                                              ;; 显示当前列
+  (setq column-number-indicator-zero-based nil)                       ;; 列从 1 开始计数
+  (setq display-time-format "📆%Y年%m月%d日 ⏰%H:%M")                ;; 日期格式
+  (setq display-time-default-load-average nil)                        ;; 不现实负载
+  (setq battery-mode-line-format "🔋%p%% ⚡%r瓦")                    ;; 电池格式
+  (setq battery-update-interval 1)                                    ;; 电池更新平率为 1 秒
+  (display-time-mode 1)                                               ;; 显示时间
+  (display-battery-mode 1)                                            ;; 显示电池
+#+end_src
+
+* minibuffer 配置
+#+begin_src emacs-lisp
+  (minibuffer-electric-default-mode 1)                                ;; minibuffer 增强功能
+  (fido-vertical-mode 1)                                         ;; 垂直补全
+  (setq completion-auto-help nil)                                     ;; 按 TAB 不显示补全列表缓冲区
+#+end_src
+
+* 主题配置
+** 基础配色
+#+begin_src emacs-lisp
+  (use-package catppuccin-theme
+    :ensure t
+    :config
+    (setq catppuccin-flavor 'mocha)
+    (load-theme 'catppuccin t))
+#+end_src
+** 彩虹括号
+#+begin_src elisp
+  (use-package rainbow-delimiters
+    :ensure t
+    :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+* tree-sitter 配置
+** 基础配置
+#+begin_src emacs-lisp
+  (use-package treesit
+    :config
+    (setq treesit-language-source-alist
+          '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
+            (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
+            (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+            (hyprlang . ("https://github.com/tree-sitter-grammars/tree-sitter-hyprlang"))))
+    (setq major-mode-remap-alist
+          '((c-mode . c-ts-mode)
+            (c++-mode . c++-ts-mode)
+            (toml-mode . toml-ts-mode)))
+    (setq treesit-font-lock-level 4))
+
+
+#+end_src
+** hyprland 高亮
+#+begin_src emacs-lisp
+  (defcustom hyprlang-ts-mode-indent-offset 4
+    "在 hyprlang-ts-mode 中设置代码缩进."
+    :type 'integer
+    :safe 'integerp
+    :group 'hyprlang)
+
+  (defvar hyprlang-ts-mode--font-lock-rules
+    (treesit-font-lock-rules
+     :language 'hyprlang
+     :feature 'comment    ;; 配置代码注释
+     `((comment) @font-lock-comment-face)
+
+     :language 'hyprlang
+     :feature 'special    ;; 配置特殊关键字
+     `([ "source" "exec" "exec-once" ] @font-lock-keyword-face)
+
+     :language 'hyprlang
+     :feature 'keyword    ;; 配置中的 bind workspace monitor 等
+     `((keyword (name) @font-lock-keyword-face))
+
+     :language 'hyprlang
+     :feature 'assignment    ;; 匹配赋值语句中的变量名部分
+     `((assignment (name) @font-lock-property-use-face))
+
+     :language 'hyprlang
+     :override t          ;; 优先级更高
+     :feature 'section    ;; 匹配节名，如 general {, bind { 中的 general, bind
+     `((section (name) @font-lock-type-face))
+
+     :language 'hyprlang
+     :override t
+     :feature 'section-device    ;; 特殊的设备节，如 device:name {
+     `((section device: (device_name) @font-lock-type-face))
+
+     :language 'hyprlang
+     :feature 'variable    ;; 匹配变量引用，如 $mainMod
+     `((variable) @font-lock-variable-name-face)
+
+     :language 'hyprlang
+     :feature 'dollar    ;; 匹配变量前缀 $
+     `("$" @font-lock-punctuation-face)
+
+     :language 'hyprlang
+     :feature 'boolean    ;; 匹配布尔值
+     `((boolean) @font-lock-number-face)
+
+     :language 'hyprlang
+     :feature 'mod    ;; 匹配修饰键，如 SUPER, SHIFT, CTRL
+     `((mod) @font-lock-constant-face)
+
+     :language 'hyprlang
+     :feature 'builtin    ;; 匹配颜色函数 rgb(), rgba()
+     `([ "rgb" "rgba" ] @font-lock-builtin-face)
+
+     :language 'hyprlang
+     :feature 'number    ;; 匹配多种数字类型
+     `([ (number) (legacy_hex) (angle) (hex) (display) (position) ] @font-lock-number-face)
+
+     :language 'hyprlang
+     :feature 'deg    ;; 匹配角度单位 deg
+     `("deg" @font-lock-type-face)
+
+     :language 'hyprlang
+     :feature 'delimit    ;; 匹配逗号和冒号
+     `([ "," ":" ] @font-lock-delimiter-face)
+
+     :language 'hyprlang
+     :feature 'bracket    ;; 匹配圆括号和花括号
+     `([ "(" ")" "{" "}" ] @font-lock-bracket-face)
+
+     :language 'hyprlang
+     :feature 'operator    ;; 匹配赋值和算术运算符
+     `([ "=" "-" "+" ] @font-lock-operator-face)
+
+     :language 'hyprlang
+     :feature 'string    ;; 匹配字符串和字符串字面量
+     `([ (string) (string_literal) ] @font-lock-string-face)))
+
+  (defvar hyprlang-ts-mode--indent-rules    ;; hyprlang-ts-mode 的缩进规则定义
+    `((hyprlang
+       ((node-is "}") parent-bol 0)
+       ((parent-is "configuration") column-0 0)
+       ((parent-is "section") parent-bol hyprlang-ts-mode-indent-offset))))
+
+  (defvar hyprlang-ts-mode--syntax-table    ;; 创建语法表
+    (let ((syntax-table (make-syntax-table)))
+      (modify-syntax-entry ?# "<" syntax-table)
+      (modify-syntax-entry ?\n ">#" syntax-table)
+      syntax-table)
+    "Syntax table for `hyprlang-ts-mode'.")
+
+  (defun hyprlang-ts-mode--defun-name (node)
+    "函数名就是 section 的名称"
+    (if (string-equal-ignore-case (treesit-node-type node) "section")
+        (treesit-node-text (treesit-node-child node 0) t)
+      nil))
+
+  (defun hyprlang-ts-setup ()
+    "为当前缓冲区创建一个 hyprlang 语言的 Tree-sitter 解析器"
+    (treesit-parser-create 'hyprlang)
+    ;; comment starts with # and it doesn't need and end symbol
+    (setq-local comment-start "#")
+    (setq-local comment-end "")
+    (setq-local treesit-defun-name-function #'hyprlang-ts-mode--defun-name)
+
+    ;; Navigation
+    (setq-local treesit-defun-type-regexp "section")
+
+    ;; Imenu
+    (setq-local treesit-simple-imenu-settings
+                '(("Section" "\\`section\\'" nil nil)))
+
+    ;; set font lock
+    (setq-local treesit-font-lock-settings hyprlang-ts-mode--font-lock-rules)
+    (setq-local treesit-font-lock-feature-list
+                '((comment special deg delimit dollar bracket)
+                  (section section-device assignment keyword declaration)
+                  (builtin operator variable string number boolean mod)))
+
+    ;; set indentation rules
+    (setq-local treesit-simple-indent-rules hyprlang-ts-mode--indent-rules)
+    (treesit-major-mode-setup))
+
+  (define-derived-mode hyprlang-ts-mode prog-mode "Hyprlang"
+    "A mode for editing Hyprland configuration file."
+    :group 'hyprlang
+    :syntax-table hyprlang-ts-mode--syntax-table
+
+    (unless (treesit-ready-p 'hyprlang)
+      ;; add the language grammer
+      (if (and (treesit-available-p) (boundp 'treesit-language-source-alist))
+          (add-to-list 'treesit-language-source-alist
+                       '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang" "master")))
+      (error "Tree-sitter for hyprlang isn't available.
+  You can install it with `treesit-install-language-grammar'"))
+
+    (hyprlang-ts-setup))
+
+  (if (treesit-ready-p 'hyprlang)
+      (add-to-list 'auto-mode-alist '("/hypr/.*\\.conf\\'" . hyprlang-ts-mode)))
+#+end_src
+
+* lsp 配置
+** 基础配置
+#+begin_src emacs-lisp
+  (use-package eglot
+    :config
+    (add-to-list 'eglot-server-programs '((c++-ts-mode c-ts-mode) "clangd"))
+    :hook
+    (c++-ts-mode . eglot-ensure)
+    (c-ts-mode . eglot-ensure))
+#+end_src
+** 补全设置
+#+begin_src elisp
+
+#+end_src
+
+* org 配置
+** 基础配置
+#+begin_src emacs-lisp
+  (org-babel-do-load-languages          ; org 中快速运行代码
+   'org-babel-load-languages
+   '((python . t)
+     (C . t)))
+  (setq org-startup-with-latex-preview t)
+  (setq org-startup-numerated t)        ; 在 org 标题中添加序号
+  (setq org-hide-emphasis-markers t)    ; 自动隐藏标记符号
+#+end_src
+** 编辑不可见部分
+#+begin_src elisp
+  (use-package org-appear
+    :ensure t
+    :hook (org-mode . org-appear-mode)
+    :config
+    (setq org-appear-autostart t)
+    (setq org-appear-autoemphasis t)
+    (setq org-appear-autolinks t)
+    (setq org-appear-autoentities t)
+    (setq org-appear-autokeywords t)
+    (setq org-appear-autosubmarkers t))
+#+end_src
+
+* 文件配置
+#+begin_src emacs-lisp
+  (use-package recentf
+    :init (recentf-mode 1)
+    :config
+    (global-set-key (kbd "C-x C-b") 'recentf-open-files)
+    (setq recentf-max-menu-item 10))
+#+end_src
+
+* eshell 配置
+** 基础配置
+#+begin_src emacs-lisp
+  (setq eshell-banner-message "")                      ;; 取消 eshell 启动问候
+
+  (add-hook 'eshell-mode-hook
+            (lambda ()
+              (shell-command "fcitx5-remote -c")       ;; 关闭输入法
+              (display-line-numbers-mode -1)))         ;; 不显示行号
+
+  (defun toggle-eshell()
+    (interactive)
+    (if (get-buffer-window "*eshell*")                   ;; 检查是否存在显示 *eshell* 缓冲区的窗口
+        (let ((buf (get-buffer "*eshell*")))             ;; 为变量 buf 绑定 *eshell*
+          (kill-buffer buf)                              ;; 杀死缓冲区
+          (delete-window (get-buffer-window buf)))       ;; 关闭窗口
+      (let ((win (split-window-below 32)))               ;; 否则，在底部新建一个窗口,高度自定义
+        (select-window win)                              ;; 焦点切换到这个窗口
+        (eshell))))                                      ;; 运行 eshell
+
+  (defun my-eshell-prompt ()
+    "深色主题最佳可读性提示符"
+    (concat
+     (propertize "🦊 " 'face '(:foreground "#FF6B35"))                     ;; 图标 - 亮橙色
+     (propertize (user-login-name) 'face '(:foreground "#4ECDC4"))        ;; 用户名 - 青色
+     (propertize "@" 'face '(:foreground "#A0A0A0"))                      ;; 分隔符 - 浅灰色
+     (propertize (file-name-nondirectory (eshell/pwd))                    ;; 目录名 - 亮绿色
+                 'face '(:foreground "#98CE00" :bold t :weight 'bold))
+     (propertize " > " 'face '(:foreground "#FFD166"))))                  ;; 结尾符号 - 亮黄色
+  (setq eshell-prompt-function 'my-eshell-prompt)
+  #+end_src
+
+** eshell 快速运行代码
+#+begin_src emacs-lisp
+  (defun esh-coderun ()
+    "快速执行代码"
+    (interactive)
+    (let* ((file (buffer-name))       ;; 获取文件名
+           (main (file-name-base))    ;; 获取不带扩展名的文件名
+           (cmd (format "clang %s -o %s" file main)))    ;; 设定好需要执行的命令
+      (toggle-eshell)                 ;; 打开 eshell
+      (insert cmd)                    ;; 插入命令
+      (eshell-send-input)))           ;; 执行命令
+#+end_src
+
+* 邮件配置
+#+begin_src elisp
+  (require 'auth-source)
+  (setq auth-sources '("~/.authinfo" "~/.authinfo.gpg"))    ;; 授权码
+  (setq message-send-mail-function 'smtpmail-send-it)       ;; 发送邮件使用的函数
+  (setq user-mail-address "1102812928@qq.com")              ;; 设置邮箱地址
+  (setq user-full-name "JanSky")                            ;; 设置邮箱用户名
+  (setq smtpmail-smtp-user "1102812928@qq.com"              ;; 设置邮箱用户
+        smtpmail-smtp-server "smtp.qq.com"                  ;; 设置服务
+        smtpmail-smtp-service 465                           ;; 设置端口
+        smtpmail-stream-type 'ssl)                          ;; 设置安全服务
+  (setq smtpmail-debug-info t)                              ;; 基础调试信息
+  (setq smtpmail-debug-verb t)                              ;; 详细调试信息
+  (setq message-kill-buffer-on-exit t)                      ;; 发送后删除缓冲区
+  (setq message-signature "你诺安好，便是晴天")             ;; 自带添加签名
+
+  (setq gnus-select-method
+        '(nnimap "qq"
+                 (nnimap-address "imap.qq.com")
+                 (nnimap-server-port 993)
+                 (nnimap-stream ssl)
+                 (nnimap-authinfo-file "~/.authinfo")))
+#+end_src
+
+* 杂项功能
+** ASCII 码表展示
+#+begin_src emacs-lisp
+  (defun ascii()
+    "展示ascii码表"
+    (interactive)
+    (switch-to-buffer "*ASCII*")
+    (erase-buffer)
+    (setq buffer-read-only nil)        ;; Not need to edit the content, just read mode (added)
+    (local-set-key "q" 'bury-buffer)   ;; Nice to have the option to bury the buffer (added)
+    (setq lower32 '("nul" "soh" "stx" "etx" "eot" "enq" "ack" "bel"
+  		          "bs" "ht" "nl" "vt" "np" "cr" "so" "si"
+  		          "dle" "dc1" "dc2" "dc3" "dc4" "nak" "syn" "etb"
+  		          "can" "em" "sub" "esc" "fs" "gs" "rs" "us"))
+    (save-excursion (let ((i -1))
+                      (insert "ASCII characters 0 thru 127.\n\n")
+                      (insert " 十六进制  十进制  字符 |  十六进制  十进制  字符 |  十六进制  十进制  字符 | 十六进制  十进制  字符\n")
+                      (while (< i 31)
+                        (insert (format " %4x      %4d    %4s | %4x      %4d    %4s  | %4x      %4d    %4s  |  %4x     %4d  %4s \n"
+                                        (setq i (+ 1  i)) i (elt lower32 i)
+                                        (setq i (+ 32 i)) i (single-key-description i)
+                                        (setq i (+ 32 i)) i (single-key-description i)
+                                        (setq i (+ 32 i)) i (single-key-description i)))
+                        (setq i (- i 96))))))
+#+end_src
+
+** 快速打开配置文件
+#+begin_src emacs-lisp
+  (defun open-file-config()
+    "打开配置文件"
+    (interactive)
+    (let ((buffer (buffer-name)))
+      (if (string= buffer "emacs.org")
+          (kill-buffer buffer)
+        (find-file "~/.emacs.d/emacs.org"))))
+#+end_src
+
+** 网络调试助手
+#+begin_src elisp
+  (defvar my-server-process nil
+    "保存服务器进程的变量")
+
+  (defun my-server-start ()
+    "在指定端口启动服务器"
+    (interactive )
+    (setq my-server-process
+          (make-network-process
+           :name "my-server"
+           :service 8080
+           :host "192.168.1.109"
+           :server t
+           :family 'ipv4
+           :filter 'my-server-filter
+           :sentinel 'my-server-sentinel))
+    (message "服务器已启动在端口 %d" 8888))
+
+  (defun my-server-filter (process string)
+    "处理接收到的数据"
+    (let ((client-name (process-name process)))
+      (when (string-match "^\\(.*\\)\n" string)
+        (let ((message (match-string 1 string)))
+          (message "收到来自 %s 的消息: %s" client-name message)
+          ;; 发送回复
+          (process-send-string process 
+                               (format "服务器收到: %s\n" message))))))
+
+  (defun my-server-sentinel (process event)
+    "处理连接状态变化"
+    (message "连接状态: %s %s" (process-name process) event))
+
+  (defun my-server-stop ()
+    "停止服务器"
+    (interactive)
+    (when my-server-process
+      (delete-process my-server-process)
+      (setq my-server-process nil)
+      (message "服务器已停止")))
+#+end_src
+** 关闭当前缓冲区
+#+begin_src elisp
+  (defun kill-current-buffer ()
+    "关闭当前缓冲区"
+    (interactive)
+    (kill-buffer (current-buffer)))
+#+end_src
+
 * 快捷键提示
+** 基础设置
 #+begin_src emacs-lisp
   (use-package which-key
     :init
     (define-key global-map (kbd "<f2>") '("打开 Eshell" . toggle-eshell))
     (define-key global-map (kbd "<f3>") '("打开配置文件" . open-file-config))
+    (define-key global-map (kbd "<f5>") '("快速运行代码" . esh-coderun))
+    (define-key global-map (kbd "C-x c") '("关闭当前缓冲区" . kill-current-buffer))
     :config (which-key-mode 1))
-
+#+end_src
+** 普通模式快捷键
+#+begin_src elisp
   (which-key-add-key-based-replacements
     "C-x 0" "关闭当前窗口"
     "C-x 1" "关闭其他窗口"
     "C-x 2" "底部分屏"
     "C-x 3" "右侧分屏"
+    "C-x 4 m" "右侧撰写邮件"
+    "C-x 5 m" "新建窗口撰写邮件"
     "C-x =" "光标位置字符信息"
+    "C-x m" "撰写邮件"
     "C-x u" "撤销一次更改"
+    "C-x z" "重复上次执行的命令"
     "C-x C-c" "退出"
     "C-x C-f" "查找文件"
+    "C-x C-n" "定位目标列"
     "C-x C-o" "删除光标上下空白行"
-    "C-x C-s" "保存文件"
+    "C-x C-s" "保存文件")
+
+  (which-key-add-key-based-replacements
+    "C-h 4 s" "跳转定义"
+    "C-h RET" "查看订购信息"
     "C-h a" "按关键词搜索命令"
     "C-h b" "显示所有按键绑定"
     "C-h c" "快速显示快捷键功能"
@@ -74,8 +492,8 @@
     "C-h m" "当前 mode 的描述文档"
     "C-h n" "最近 emacs 更改新闻"
     "C-h o" "光标下的 elisp 函数文档"
-    "C-h p" "搜索已安装的内置包"
-    "C-h P" "显示可安装的插件"
+    "C-h p" "关键字查询软件包"
+    "C-h P" "软件包描述"
     "C-h q" "帮助退出"
     "C-h r" "打开 emacs 手册"
     "C-h R" "打开 info 手册"
@@ -87,143 +505,51 @@
     "C-h x" "显示指定命令的文档"
     "C-h ." "光标位置局部帮助信息"
     "C-h ?" "帮助命令菜单"
+    "C-h C-\\" "查看输入法信息"
     "C-h <f1>" "帮助命令菜单"
+    "C-h C-a" "打开 Emacs 开始界面"
+    "C-h C-c" "查看 Emacs 完整许可证"
+    "C-h C-d" "显示 Emacs 调试帮助信息"
+    "C-h C-e" "显示外部软件包的信息"
     "C-h C-f" "打开 Emacs FAQ"
     "C-h C-h" "帮助命令菜单"
+    "C-h C-n" "查看 Emacs 更新新闻"
+    "C-h C-o" "查看 Emacs 分发信息"
+    "C-h C-p" "查看 Emacs 已知问题"
     "C-h C-q" "常用命令及其按键绑定"
+    "C-h C-t" "查看 Emacs 开发计划"
+    "C-h C-w" "查看 GNU Emacs 免责声明")
+
+  (which-key-add-key-based-replacements
     "M-g TAB" "跳转指定列"
     "M-g c" "跳转指定字符数"
     "M-g g" "跳转指定行"
     "M-g M-g" "跳转指定行")
 #+end_src
-* 启动面板
-#+begin_src emacs-lisp
-  (use-package dashboard
-    :ensure t
-    :config
-    (dashboard-setup-startup-hook)
-    :init
-    (setq dashboard-banner-logo-title "你若安好，便是晴天")
-    (setq dashboard-init-info "中国科学院大学沈阳计算技术研究所")
-    (setq dashboard-footer-messages '("落霞与孤鹜齐飞 秋水共长天一色"))
-    (setq dashboard-startup-banner 'official)
-    (setq dashboard-display-icons-p t)
-    (setq dashboard-icon-type 'nerd-icons)
-    (setq dashboard-set-heading-icons t)
-    (setq dashboard-set-file-icons t)
-    (setq dashboard-set-navigator t)
-    (setq dashboard-items '((recents . 10))))
+** 邮件模式
+#+begin_src elisp
+  (which-key-add-major-mode-key-based-replacements 'message-mode
+    "C-c C-a" "添加附件"
+    "C-c C-b" "跳转到消息正文"
+    "C-c C-c" "发送邮件并退出"
+    "C-c C-f C-s" "移动到主题"
+    "C-c C-f C-c" "移动到 CC 标题"
+    "C-c C-f C-b" "移动到 BCC 头部"
+    "C-c C-f C-r" "移动到 Reply-To 头部"
+    "C-c C-f C-f" "移动到 Mail-Followup-To 头部字段"
+    "C-c C-f C-w" "添加一个新的 FCC 头字段"
+    "C-c C-w" "插入自定义签名"
+    "C-c C-s" "发送邮件"
+    "C-c C-q" "自动换行处理引用的邮件内容"
+    "C-c C-y" "邮件回复时自动引用原文")
 #+end_src
-* org 配置
-#+begin_src emacs-lisp
-  (use-package org-appear
-    :ensure t
-    :hook (org-mode . org-appear-mode)
-    :config
-    (setq org-appear-autostart t)
-    (setq org-appear-autoemphasis t)
-    (setq org-appear-autolinks t)
-    (setq org-appear-autoentities t)
-    (setq org-appear-autokeywords t)
-    (setq org-appear-autosubmarkers t))
-  (use-package org-fragtog
-    :ensure t
-    :hook (org-mode . org-fragtog-mode))
-  (use-package org-superstar
-    :ensure t
-    :after org
-    :hook (org-mode . org-superstar-mode))
-  (use-package valign
-    :ensure t
-    :config
-    (setq valign-fancy-bar t)
-    (setq org-startup-align-all-tables t)
-    :hook (org-mode . valign-mode))
-
-  (org-babel-do-load-languages          ; org 中快速运行代码
-   'org-babel-load-languages
-   '((python . t)
-     (C . t)))
-  (setq org-startup-with-latex-preview t)
-  (setq org-startup-numerated t)        ; 在 org 标题中添加序号
-  (setq org-hide-emphasis-markers t)    ; 自动隐藏标记符号
+** org 模式快捷键
+#+begin_src elisp
+  (which-key-add-major-mode-key-based-replacements 'org-mode
+    "C-c C-," "插入结构模板")
 #+end_src
-* git 配置
-#+begin_src emacs-lisp
-  (use-package magit
-  :ensure t)
-#+end_src
-* 文件配置
-#+begin_src emacs-lisp
-  (use-package recentf
-    :init (recentf-mode 1)
-    :config
-    (global-set-key (kbd "C-x C-b") 'recentf-open-files)
-    (setq recentf-max-menu-item 10))
-#+end_src
-* eshell 配置
-#+begin_src emacs-lisp
-  (use-package esh-autosuggest
-    :hook (eshell-mode . esh-autosuggest-mode)
-    :ensure t)
-  (use-package eshell-syntax-highlighting
-    :ensure t
-    :config
-    (setq eshell-banner-message "")
-    (setq eshell-syntax-highlighting-highlight-in-remote-dirs t)
-    (eshell-syntax-highlighting-global-mode +1))
-
-  (defun toggle-eshell()
-    (interactive)
-    (if (get-buffer-window "*eshell*")                 ; 如果 eshell 窗口已打开，则完全退出
-        (let ((buf (get-buffer "*eshell*")))
-          (when (get-buffer-process buf)               ; 如果 eshell 有进程，则杀死
-            (eshell-kill-process))
-          (kill-buffer buf)                            ; 杀死缓冲区
-          (delete-window (get-buffer-window buf)))     ; 关闭窗口
-      (let ((win (split-window-below 30)))             ; 否则，新建 eshell
-        (select-window win)
-        (eshell))))
-
-  ;;(define-key global-map (kbd "<f2>") '("打开 Eshell" . toggle-eshell))
-#+end_src
-* 自定义功能
-#+begin_src emacs-lisp
-  (defun ascii()
-    "展示ascii码表"
-    (interactive)
-    (switch-to-buffer "*ASCII*")
-    (erase-buffer)
-    (setq buffer-read-only nil)        ;; Not need to edit the content, just read mode (added)
-    (local-set-key "q" 'bury-buffer)   ;; Nice to have the option to bury the buffer (added)
-    (setq lower32 '("nul" "soh" "stx" "etx" "eot" "enq" "ack" "bel"
-  		          "bs" "ht" "nl" "vt" "np" "cr" "so" "si"
-  		          "dle" "dc1" "dc2" "dc3" "dc4" "nak" "syn" "etb"
-  		          "can" "em" "sub" "esc" "fs" "gs" "rs" "us"
-  		          ))
-    (save-excursion (let ((i -1))
-                      (insert "ASCII characters 0 thru 127.\n\n")
-                      (insert " 十六进制  十进制  字符 |  十六进制  十进制  字符 |  十六进制  十进制  字符 | 十六进制  十进制  字符\n")
-                      (while (< i 31)
-                        (insert (format " %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s | %4x      %4d    %4s \n"
-                                        (setq i (+ 1  i)) i (elt lower32 i)
-                                        (setq i (+ 32 i)) i (single-key-description i)
-                                        (setq i (+ 32 i)) i (single-key-description i)
-                                        (setq i (+ 32 i)) i (single-key-description i)))
-                        (setq i (- i 96))))))
-
-  (defun nasm-compile()
-    "自动使用 make 编译汇编"
-    (interactive)
-    (unless (file-exists-p "Makefile")
-      (error "No Makefile found in current directory"))
-    (compile "make bochs"))
-
-  (defun open-file-config()
-    "打开配置文件"
-    (interactive)
-    (let ((buffer (buffer-name)))
-      (if (string= buffer "emacs.org")
-          (switch-to-buffer (other-buffer))
-        (find-file "~/.emacs.d/emacs.org"))))
+** C 模式
+#+begin_src elisp
+  (which-key-add-major-mode-key-based-replacements 'c-ts-mode
+    "C-c ." "C 语言代码风格")
 #+end_src

@@ -393,44 +393,58 @@
 
 ** 网络调试助手
 #+begin_src elisp
-  (defvar my-server-process nil
+  (defvar server-process nil
     "保存服务器进程的变量")
 
-  (defun my-server-start ()
-    "在指定端口启动服务器"
-    (interactive )
-    (setq my-server-process
-          (make-network-process
-           :name "my-server"
-           :service 8080
-           :host "192.168.1.109"
-           :server t
-           :family 'ipv4
-           :filter 'my-server-filter
-           :sentinel 'my-server-sentinel))
-    (message "服务器已启动在端口 %d" 8888))
+  (defun server-filter (process string)
+    "处理消息"
+    (message "收到消息: %s" string)
+    (process-send-string process (format "服务器收到")))
 
-  (defun my-server-filter (process string)
-    "处理接收到的数据"
-    (let ((client-name (process-name process)))
-      (when (string-match "^\\(.*\\)\n" string)
-        (let ((message (match-string 1 string)))
-          (message "收到来自 %s 的消息: %s" client-name message)
-          ;; 发送回复
-          (process-send-string process 
-                               (format "服务器收到: %s\n" message))))))
-
-  (defun my-server-sentinel (process event)
+  (defun server-sentinel (process event)
     "处理连接状态变化"
     (message "连接状态: %s %s" (process-name process) event))
 
-  (defun my-server-stop ()
-    "停止服务器"
-    (interactive)
-    (when my-server-process
-      (delete-process my-server-process)
-      (setq my-server-process nil)
-      (message "服务器已停止")))
+  (defun tcp-server ()
+    "在指定端口启动 TCP 服务器"
+    (interactive )
+    (if (null server-process)
+        (progn
+          (setq server-process
+                (make-network-process
+                 :name "tcp-server"                 ;; 进程的名字
+                 :service 8080                      ;; 端口号
+                 :host "127.0.0.1"                  ;; ip 地址
+                 :server t                          ;; 创建服务器进程
+                 :family 'ipv4                      ;; 是用 ipv4
+                 :noquery t                         ;; Emacs 退出时自动终止进程
+                 :filter 'server-filter             ;; 处理消息
+                 :sentinel 'server-sentinel))       ;; 处理连接状态
+                (message "TCP 服务器已启动在端口 %d" 8080))
+      (progn (delete-process server-process)
+             (setq server-process nil)
+             (message "TCP 服务器已停止"))))
+
+  (defun udp-server ()
+    "在指定端口启动 UDP 服务器"
+    (interactive )
+    (if (null server-process)
+        (progn
+          (setq server-process
+                (make-network-process
+                 :name "udp-server"                 ;; 进程的名字
+                 :service 8080                      ;; 端口号
+                 :host "127.0.0.1"                  ;; ip 地址
+                 :server t                          ;; 创建服务器进程
+                 :family 'ipv4                      ;; 是用 ipv4
+                 :type 'datagram                    ;; UDP 协议
+                 :noquery t                         ;; Emacs 退出时自动终止进程
+                 :filter 'server-filter             ;; 处理消息
+                 :sentinel 'server-sentinel))       ;; 处理连接状态
+                (message "UDP 服务器已启动在端口 %d" 8080))
+      (progn (delete-process server-process)
+             (setq server-process nil)
+             (message "UDP 服务器已停止"))))
 #+end_src
 ** 关闭当前缓冲区
 #+begin_src elisp

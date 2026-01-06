@@ -79,15 +79,20 @@
 #+begin_src emacs-lisp
   (use-package treesit
     :config
+    (setq treesit-workdir (expand-file-name "~/.emacs.d/tree-sitter/"))
     (setq treesit-language-source-alist
           '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
             (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
             (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+            (markdown . ("https://github.com/MDeiml/tree-sitter-markdown"))
+            (markdown-inline . ("https://github.com/MDeiml/tree-sitter-markdown"))
+            (html . ("https://github.com/tree-sitter/tree-sitter-html"))
             (hyprlang . ("https://github.com/tree-sitter-grammars/tree-sitter-hyprlang"))))
     (setq major-mode-remap-alist
           '((c-mode . c-ts-mode)
             (c++-mode . c++-ts-mode)
-            (toml-mode . toml-ts-mode)))
+            (mhtml-mode . html-ts-mode)
+            (conf-toml-mode . toml-ts-mode)))
     (setq treesit-font-lock-level 4))
 
 
@@ -245,10 +250,14 @@
     :hook
     (c++-ts-mode . eglot-ensure)
     (c-ts-mode . eglot-ensure))
-#+end_src
-** 补全设置
-#+begin_src elisp
 
+  (setq c-ts-mode-indent-offset 4)
+#+end_src
+** 文档查看
+#+begin_src elisp
+  (add-hook 'special-mode-hook
+            (lambda ()
+              (display-line-numbers-mode -1)))         ;; 不显示行号
 #+end_src
 
 * org 配置
@@ -280,8 +289,9 @@
 #+begin_src emacs-lisp
   (use-package recentf
     :init (recentf-mode 1)
+    :hook (emacs-startup . recentf-open-files)
     :config
-    (global-set-key (kbd "C-x C-b") 'recentf-open-files)
+    (global-set-key (kbd "<f1>") 'recentf-open-files)
     (setq recentf-max-menu-item 10))
 #+end_src
 
@@ -295,24 +305,20 @@
               (shell-command "fcitx5-remote -c")       ;; 关闭输入法
               (display-line-numbers-mode -1)))         ;; 不显示行号
 
-  (defun toggle-eshell()
-    (interactive)
-    (if (get-buffer-window "*eshell*")                   ;; 检查是否存在显示 *eshell* 缓冲区的窗口
-        (let ((buf (get-buffer "*eshell*")))             ;; 为变量 buf 绑定 *eshell*
-          (kill-buffer buf)                              ;; 杀死缓冲区
-          (delete-window (get-buffer-window buf)))       ;; 关闭窗口
-      (let ((win (split-window-below 32)))               ;; 否则，在底部新建一个窗口,高度自定义
-        (select-window win)                              ;; 焦点切换到这个窗口
-        (eshell))))                                      ;; 运行 eshell
+  (defun kill-eshell-buf ()
+    "杀死 eshell"
+    (let ((buf "*eshell*"))
+          (kill-buffer buf)
+          (delete-window (get-buffer-window buf))))
 
   (defun my-eshell-prompt ()
     "深色主题最佳可读性提示符"
     (concat
-     (propertize "🦊 " 'face '(:foreground "#FF6B35"))                     ;; 图标 - 亮橙色
+     (propertize "🦊 " 'face '(:foreground "#FF6B35"))                    ;; 图标 - 亮橙色
      (propertize (user-login-name) 'face '(:foreground "#4ECDC4"))        ;; 用户名 - 青色
      (propertize "@" 'face '(:foreground "#A0A0A0"))                      ;; 分隔符 - 浅灰色
      (propertize (file-name-nondirectory (eshell/pwd))                    ;; 目录名 - 亮绿色
-                 'face '(:foreground "#98CE00" :bold t :weight 'bold))
+                 'face '(:foreground "#98CE00" :bold))
      (propertize " > " 'face '(:foreground "#FFD166"))))                  ;; 结尾符号 - 亮黄色
   (setq eshell-prompt-function 'my-eshell-prompt)
   #+end_src
@@ -322,12 +328,24 @@
   (defun esh-coderun ()
     "快速执行代码"
     (interactive)
-    (let* ((file (buffer-name))       ;; 获取文件名
-           (main (file-name-base))    ;; 获取不带扩展名的文件名
-           (cmd (format "clang %s -o %s" file main)))    ;; 设定好需要执行的命令
-      (toggle-eshell)                 ;; 打开 eshell
-      (insert cmd)                    ;; 插入命令
-      (eshell-send-input)))           ;; 执行命令
+    (if (get-buffer-window "*eshell*")                     ;; 检查是否存在显示 *eshell* 缓冲区的窗口
+        (kill-eshell-buf)
+      (let* ((file (buffer-name))                          ;; 获取文件名
+             (main (file-name-base))                       ;; 获取不带扩展名的文件名
+             (cmd (format "clang %s -o %s" file main)))    ;; 设定好需要执行的命令
+        (toggle-eshell)                                    ;; 打开 eshell
+        (insert cmd)                                       ;; 插入命令
+        (eshell-send-input))))                             ;; 执行命令
+#+end_src
+** 打开 eshell
+#+begin_src elisp
+  (defun toggle-eshell()
+    (interactive)
+    (if (get-buffer-window "*eshell*")                   ;; 检查是否存在显示 *eshell* 缓冲区的窗口
+        (kill-eshell-buf)                                ;; 关闭窗口
+      (let ((win (split-window-below 32)))               ;; 否则，在底部新建一个窗口,高度自定义
+        (select-window win)                              ;; 焦点切换到这个窗口
+        (eshell))))                                      ;; 运行 eshell
 #+end_src
 
 * 邮件配置
@@ -355,6 +373,10 @@
 #+end_src
 
 * 杂项功能
+** 通用函数
+#+begin_src elisp
+
+#+end_src
 ** ASCII 码表展示
 #+begin_src emacs-lisp
   (defun ascii()
@@ -396,10 +418,14 @@
   (defvar server-process nil
     "保存服务器进程的变量")
 
-  (defun server-filter (process string)
-    "处理消息"
+  (defun tcp-server-filter (process string)
+    "tcp 处理消息"
     (message "收到消息: %s" string)
     (process-send-string process (format "服务器收到")))
+
+  (defun udp-server-filter (process string)
+    "udp 处理消息"
+    (message "收到消息: %s" string))
 
   (defun server-sentinel (process event)
     "处理连接状态变化"
@@ -418,7 +444,7 @@
                  :server t                          ;; 创建服务器进程
                  :family 'ipv4                      ;; 是用 ipv4
                  :noquery t                         ;; Emacs 退出时自动终止进程
-                 :filter 'server-filter             ;; 处理消息
+                 :filter 'tcp-server-filter         ;; 处理消息
                  :sentinel 'server-sentinel))       ;; 处理连接状态
                 (message "TCP 服务器已启动在端口 %d" 8080))
       (progn (delete-process server-process)
@@ -435,12 +461,11 @@
                  :name "udp-server"                 ;; 进程的名字
                  :service 8080                      ;; 端口号
                  :host "127.0.0.1"                  ;; ip 地址
-                 :server t                          ;; 创建服务器进程
                  :family 'ipv4                      ;; 是用 ipv4
+                 :server t                          ;; 创建服务器进程
                  :type 'datagram                    ;; UDP 协议
                  :noquery t                         ;; Emacs 退出时自动终止进程
-                 :filter 'server-filter             ;; 处理消息
-                 :sentinel 'server-sentinel))       ;; 处理连接状态
+                 :filter 'udp-server-filter))       ;; 处理消息
                 (message "UDP 服务器已启动在端口 %d" 8080))
       (progn (delete-process server-process)
              (setq server-process nil)
@@ -565,5 +590,8 @@
 ** C 模式
 #+begin_src elisp
   (which-key-add-major-mode-key-based-replacements 'c-ts-mode
-    "C-c ." "C 语言代码风格")
+    "C-c ." "C 语言代码风格"
+    "C-c C-c" "注释代码"
+    "C-c C-k" "切换注释风格"
+    "C-c C-q" "格式化当前层级代码")
 #+end_src

@@ -5,3 +5,4 @@
 
 (org-babel-load-file "~/.emacs.d/emacs.org")
 (put 'set-goal-column 'disabled nil)
+(put 'upcase-region 'disabled nil)

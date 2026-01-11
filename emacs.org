@@ -7,7 +7,7 @@
 * 基础配置
 #+begin_src emacs-lisp
   (setq inhibit-startup-screen t)                                     ;; 关闭开始界面
-  (global-display-line-numbers-mode 1)                                ;; 显示行号
+  (setq-default display-line-numbers t)                               ;; 显示行号
   (setq display-line-numbers-width-start t)                           ;; 动态调整行号宽度
   (setq display-line-numbers-grow-only t)                             ;; 行号宽度只增不减（减少抖动）
   (tool-bar-mode -1)                                                  ;; 关闭工具栏
@@ -26,6 +26,12 @@
   (setq-default indent-tabs-mode nil)                                 ;; 启用 tab 键
   (setq default-frame-alist '((width . 130) (height . 40)))           ;; 设置窗口大小
   (setq-default truncate-lines t)                                     ;; 禁用单行过长时自动换行
+  (setq scroll-preserve-screen-position t)                            ;; 保持光标在屏幕的绝对位置
+  (setq isearch-allow-scroll t)                                       ;; 搜索功能加强
+  (setq pixel-scroll-precision-mode t)
+
+  (add-hook 'help-fns-describe-function-functions                     ;; 显示代码示例
+            #'shortdoc-help-fns-examples-function)
 #+end_src
 
 * 插件源配置
@@ -37,11 +43,12 @@
     (package-initialize))
 #+end_src
 
-* modeline配置
+* modeline 配置
 #+begin_src emacs-lisp
   (size-indication-mode t)                                            ;; 显示文件大小
   (line-number-mode -1)                                               ;; 关闭行号显示
   (column-number-mode t)                                              ;; 显示当前列
+  (setq mode-line-in-non-selected-windows nil)                        ;; 统一 modeline 显示
   (setq column-number-indicator-zero-based nil)                       ;; 列从 1 开始计数
   (setq display-time-format "📆%Y年%m月%d日 ⏰%H:%M")                ;; 日期格式
   (setq display-time-default-load-average nil)                        ;; 不现实负载
@@ -54,7 +61,7 @@
 * minibuffer 配置
 #+begin_src emacs-lisp
   (minibuffer-electric-default-mode 1)                                ;; minibuffer 增强功能
-  (fido-vertical-mode 1)                                         ;; 垂直补全
+  (fido-vertical-mode 1)                                              ;; 垂直补全
   (setq completion-auto-help nil)                                     ;; 按 TAB 不显示补全列表缓冲区
 #+end_src
 
@@ -84,161 +91,13 @@
           '((c . ("https://github.com/tree-sitter/tree-sitter-c"))
             (cpp . ("https://github.com/tree-sitter/tree-sitter-cpp"))
             (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
-            (markdown . ("https://github.com/MDeiml/tree-sitter-markdown"))
-            (markdown-inline . ("https://github.com/MDeiml/tree-sitter-markdown"))
-            (html . ("https://github.com/tree-sitter/tree-sitter-html"))
-            (hyprlang . ("https://github.com/tree-sitter-grammars/tree-sitter-hyprlang"))))
+            (html . ("https://github.com/tree-sitter/tree-sitter-html"))))
     (setq major-mode-remap-alist
           '((c-mode . c-ts-mode)
             (c++-mode . c++-ts-mode)
             (mhtml-mode . html-ts-mode)
             (conf-toml-mode . toml-ts-mode)))
     (setq treesit-font-lock-level 4))
-
-
-#+end_src
-** hyprland 高亮
-#+begin_src emacs-lisp
-  (defcustom hyprlang-ts-mode-indent-offset 4
-    "在 hyprlang-ts-mode 中设置代码缩进."
-    :type 'integer
-    :safe 'integerp
-    :group 'hyprlang)
-
-  (defvar hyprlang-ts-mode--font-lock-rules
-    (treesit-font-lock-rules
-     :language 'hyprlang
-     :feature 'comment    ;; 配置代码注释
-     `((comment) @font-lock-comment-face)
-
-     :language 'hyprlang
-     :feature 'special    ;; 配置特殊关键字
-     `([ "source" "exec" "exec-once" ] @font-lock-keyword-face)
-
-     :language 'hyprlang
-     :feature 'keyword    ;; 配置中的 bind workspace monitor 等
-     `((keyword (name) @font-lock-keyword-face))
-
-     :language 'hyprlang
-     :feature 'assignment    ;; 匹配赋值语句中的变量名部分
-     `((assignment (name) @font-lock-property-use-face))
-
-     :language 'hyprlang
-     :override t          ;; 优先级更高
-     :feature 'section    ;; 匹配节名，如 general {, bind { 中的 general, bind
-     `((section (name) @font-lock-type-face))
-
-     :language 'hyprlang
-     :override t
-     :feature 'section-device    ;; 特殊的设备节，如 device:name {
-     `((section device: (device_name) @font-lock-type-face))
-
-     :language 'hyprlang
-     :feature 'variable    ;; 匹配变量引用，如 $mainMod
-     `((variable) @font-lock-variable-name-face)
-
-     :language 'hyprlang
-     :feature 'dollar    ;; 匹配变量前缀 $
-     `("$" @font-lock-punctuation-face)
-
-     :language 'hyprlang
-     :feature 'boolean    ;; 匹配布尔值
-     `((boolean) @font-lock-number-face)
-
-     :language 'hyprlang
-     :feature 'mod    ;; 匹配修饰键，如 SUPER, SHIFT, CTRL
-     `((mod) @font-lock-constant-face)
-
-     :language 'hyprlang
-     :feature 'builtin    ;; 匹配颜色函数 rgb(), rgba()
-     `([ "rgb" "rgba" ] @font-lock-builtin-face)
-
-     :language 'hyprlang
-     :feature 'number    ;; 匹配多种数字类型
-     `([ (number) (legacy_hex) (angle) (hex) (display) (position) ] @font-lock-number-face)
-
-     :language 'hyprlang
-     :feature 'deg    ;; 匹配角度单位 deg
-     `("deg" @font-lock-type-face)
-
-     :language 'hyprlang
-     :feature 'delimit    ;; 匹配逗号和冒号
-     `([ "," ":" ] @font-lock-delimiter-face)
-
-     :language 'hyprlang
-     :feature 'bracket    ;; 匹配圆括号和花括号
-     `([ "(" ")" "{" "}" ] @font-lock-bracket-face)
-
-     :language 'hyprlang
-     :feature 'operator    ;; 匹配赋值和算术运算符
-     `([ "=" "-" "+" ] @font-lock-operator-face)
-
-     :language 'hyprlang
-     :feature 'string    ;; 匹配字符串和字符串字面量
-     `([ (string) (string_literal) ] @font-lock-string-face)))
-
-  (defvar hyprlang-ts-mode--indent-rules    ;; hyprlang-ts-mode 的缩进规则定义
-    `((hyprlang
-       ((node-is "}") parent-bol 0)
-       ((parent-is "configuration") column-0 0)
-       ((parent-is "section") parent-bol hyprlang-ts-mode-indent-offset))))
-
-  (defvar hyprlang-ts-mode--syntax-table    ;; 创建语法表
-    (let ((syntax-table (make-syntax-table)))
-      (modify-syntax-entry ?# "<" syntax-table)
-      (modify-syntax-entry ?\n ">#" syntax-table)
-      syntax-table)
-    "Syntax table for `hyprlang-ts-mode'.")
-
-  (defun hyprlang-ts-mode--defun-name (node)
-    "函数名就是 section 的名称"
-    (if (string-equal-ignore-case (treesit-node-type node) "section")
-        (treesit-node-text (treesit-node-child node 0) t)
-      nil))
-
-  (defun hyprlang-ts-setup ()
-    "为当前缓冲区创建一个 hyprlang 语言的 Tree-sitter 解析器"
-    (treesit-parser-create 'hyprlang)
-    ;; comment starts with # and it doesn't need and end symbol
-    (setq-local comment-start "#")
-    (setq-local comment-end "")
-    (setq-local treesit-defun-name-function #'hyprlang-ts-mode--defun-name)
-
-    ;; Navigation
-    (setq-local treesit-defun-type-regexp "section")
-
-    ;; Imenu
-    (setq-local treesit-simple-imenu-settings
-                '(("Section" "\\`section\\'" nil nil)))
-
-    ;; set font lock
-    (setq-local treesit-font-lock-settings hyprlang-ts-mode--font-lock-rules)
-    (setq-local treesit-font-lock-feature-list
-                '((comment special deg delimit dollar bracket)
-                  (section section-device assignment keyword declaration)
-                  (builtin operator variable string number boolean mod)))
-
-    ;; set indentation rules
-    (setq-local treesit-simple-indent-rules hyprlang-ts-mode--indent-rules)
-    (treesit-major-mode-setup))
-
-  (define-derived-mode hyprlang-ts-mode prog-mode "Hyprlang"
-    "A mode for editing Hyprland configuration file."
-    :group 'hyprlang
-    :syntax-table hyprlang-ts-mode--syntax-table
-
-    (unless (treesit-ready-p 'hyprlang)
-      ;; add the language grammer
-      (if (and (treesit-available-p) (boundp 'treesit-language-source-alist))
-          (add-to-list 'treesit-language-source-alist
-                       '(hyprlang "https://github.com/tree-sitter-grammars/tree-sitter-hyprlang" "master")))
-      (error "Tree-sitter for hyprlang isn't available.
-  You can install it with `treesit-install-language-grammar'"))
-
-    (hyprlang-ts-setup))
-
-  (if (treesit-ready-p 'hyprlang)
-      (add-to-list 'auto-mode-alist '("/hypr/.*\\.conf\\'" . hyprlang-ts-mode)))
 #+end_src
 
 * lsp 配置
@@ -286,13 +145,20 @@
 #+end_src
 
 * 文件配置
+** recentf 配置
 #+begin_src emacs-lisp
   (use-package recentf
     :init (recentf-mode 1)
     :hook (emacs-startup . recentf-open-files)
     :config
     (global-set-key (kbd "<f1>") 'recentf-open-files)
-    (setq recentf-max-menu-item 10))
+    (setq recentf-max-menu-item 20)) 
+#+end_src
+** dired-x 配置
+#+begin_src elisp
+  (use-package dired-x
+    :after dired
+    :config (setq dired-x-hands-off-my-keys nil))
 #+end_src
 
 * eshell 配置
@@ -303,13 +169,13 @@
   (add-hook 'eshell-mode-hook
             (lambda ()
               (shell-command "fcitx5-remote -c")       ;; 关闭输入法
-              (display-line-numbers-mode -1)))         ;; 不显示行号
+              (setq display-line-numbers nil)))         ;; 不显示行号
 
   (defun kill-eshell-buf ()
     "杀死 eshell"
     (let ((buf "*eshell*"))
-          (kill-buffer buf)
-          (delete-window (get-buffer-window buf))))
+      (kill-buffer buf)
+      (delete-window (get-buffer-window buf))))
 
   (defun my-eshell-prompt ()
     "深色主题最佳可读性提示符"
@@ -321,6 +187,12 @@
                  'face '(:foreground "#98CE00" :bold))
      (propertize " > " 'face '(:foreground "#FFD166"))))                  ;; 结尾符号 - 亮黄色
   (setq eshell-prompt-function 'my-eshell-prompt)
+
+  (defun eshell/em (file)
+    "在 eshell 中打开文件"
+    (other-window 1)
+    (let ((path (eshell/pwd)))
+      (find-file (expand-file-name file path))))
   #+end_src
 
 ** eshell 快速运行代码
@@ -343,7 +215,7 @@
     (interactive)
     (if (get-buffer-window "*eshell*")                   ;; 检查是否存在显示 *eshell* 缓冲区的窗口
         (kill-eshell-buf)                                ;; 关闭窗口
-      (let ((win (split-window-below 32)))               ;; 否则，在底部新建一个窗口,高度自定义
+      (let ((win (split-window-below 30)))               ;; 否则，在底部新建一个窗口,高度自定义
         (select-window win)                              ;; 焦点切换到这个窗口
         (eshell))))                                      ;; 运行 eshell
 #+end_src
@@ -425,7 +297,8 @@
 
   (defun udp-server-filter (process string)
     "udp 处理消息"
-    (message "收到消息: %s" string))
+    (message "收到消息: %s" string)
+    (process-send-string process  "服务器收到\0"))
 
   (defun server-sentinel (process event)
     "处理连接状态变化"
@@ -489,109 +362,4 @@
     (define-key global-map (kbd "<f5>") '("快速运行代码" . esh-coderun))
     (define-key global-map (kbd "C-x c") '("关闭当前缓冲区" . kill-current-buffer))
     :config (which-key-mode 1))
-#+end_src
-** 普通模式快捷键
-#+begin_src elisp
-  (which-key-add-key-based-replacements
-    "C-x 0" "关闭当前窗口"
-    "C-x 1" "关闭其他窗口"
-    "C-x 2" "底部分屏"
-    "C-x 3" "右侧分屏"
-    "C-x 4 m" "右侧撰写邮件"
-    "C-x 5 m" "新建窗口撰写邮件"
-    "C-x =" "光标位置字符信息"
-    "C-x m" "撰写邮件"
-    "C-x u" "撤销一次更改"
-    "C-x z" "重复上次执行的命令"
-    "C-x C-c" "退出"
-    "C-x C-f" "查找文件"
-    "C-x C-n" "定位目标列"
-    "C-x C-o" "删除光标上下空白行"
-    "C-x C-s" "保存文件")
-
-  (which-key-add-key-based-replacements
-    "C-h 4 s" "跳转定义"
-    "C-h RET" "查看订购信息"
-    "C-h a" "按关键词搜索命令"
-    "C-h b" "显示所有按键绑定"
-    "C-h c" "快速显示快捷键功能"
-    "C-h C" "描述编码系统"
-    "C-h d" "按关键词搜索所有"
-    "C-h e" "显示缓冲区"
-    "C-h f" "查询 elisp 函数文档"
-    "C-h F" "打开指定命令文档"
-    "C-h g" "打开 GUN 项目网页"
-    "C-h h" "打开 hello 页面"
-    "C-h i" "打开 info 手册"
-    "C-h I" "输入法文档"
-    "C-h k" "快捷键描述"
-    "C-h K" "按快捷键搜索文档"
-    "C-h l" "最近 300 次按键使用"
-    "C-h L" "显示语言环境相关"
-    "C-h m" "当前 mode 的描述文档"
-    "C-h n" "最近 emacs 更改新闻"
-    "C-h o" "光标下的 elisp 函数文档"
-    "C-h p" "关键字查询软件包"
-    "C-h P" "软件包描述"
-    "C-h q" "帮助退出"
-    "C-h r" "打开 emacs 手册"
-    "C-h R" "打开 info 手册"
-    "C-h s" "当前缓冲区的语法表"
-    "C-h S" "显示编程语言符号文档"
-    "C-h t" "emacs 快速指南"
-    "C-h v" "elisp 变量文档"
-    "C-h w" "查找命令绑定的快捷键"
-    "C-h x" "显示指定命令的文档"
-    "C-h ." "光标位置局部帮助信息"
-    "C-h ?" "帮助命令菜单"
-    "C-h C-\\" "查看输入法信息"
-    "C-h <f1>" "帮助命令菜单"
-    "C-h C-a" "打开 Emacs 开始界面"
-    "C-h C-c" "查看 Emacs 完整许可证"
-    "C-h C-d" "显示 Emacs 调试帮助信息"
-    "C-h C-e" "显示外部软件包的信息"
-    "C-h C-f" "打开 Emacs FAQ"
-    "C-h C-h" "帮助命令菜单"
-    "C-h C-n" "查看 Emacs 更新新闻"
-    "C-h C-o" "查看 Emacs 分发信息"
-    "C-h C-p" "查看 Emacs 已知问题"
-    "C-h C-q" "常用命令及其按键绑定"
-    "C-h C-t" "查看 Emacs 开发计划"
-    "C-h C-w" "查看 GNU Emacs 免责声明")
-
-  (which-key-add-key-based-replacements
-    "M-g TAB" "跳转指定列"
-    "M-g c" "跳转指定字符数"
-    "M-g g" "跳转指定行"
-    "M-g M-g" "跳转指定行")
-#+end_src
-** 邮件模式
-#+begin_src elisp
-  (which-key-add-major-mode-key-based-replacements 'message-mode
-    "C-c C-a" "添加附件"
-    "C-c C-b" "跳转到消息正文"
-    "C-c C-c" "发送邮件并退出"
-    "C-c C-f C-s" "移动到主题"
-    "C-c C-f C-c" "移动到 CC 标题"
-    "C-c C-f C-b" "移动到 BCC 头部"
-    "C-c C-f C-r" "移动到 Reply-To 头部"
-    "C-c C-f C-f" "移动到 Mail-Followup-To 头部字段"
-    "C-c C-f C-w" "添加一个新的 FCC 头字段"
-    "C-c C-w" "插入自定义签名"
-    "C-c C-s" "发送邮件"
-    "C-c C-q" "自动换行处理引用的邮件内容"
-    "C-c C-y" "邮件回复时自动引用原文")
-#+end_src
-** org 模式快捷键
-#+begin_src elisp
-  (which-key-add-major-mode-key-based-replacements 'org-mode
-    "C-c C-," "插入结构模板")
-#+end_src
-** C 模式
-#+begin_src elisp
-  (which-key-add-major-mode-key-based-replacements 'c-ts-mode
-    "C-c ." "C 语言代码风格"
-    "C-c C-c" "注释代码"
-    "C-c C-k" "切换注释风格"
-    "C-c C-q" "格式化当前层级代码")
 #+end_src
